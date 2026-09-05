@@ -39,26 +39,39 @@
     });
   }
 
-  /* ---- Productos destacados --------------------------------------------- */
+  /* ---- Productos destacados ---------------------------------------------
+     La tarjeta muestra el precio de contado grande y, solo si es distinto,
+     el de cuenta corriente abajo en chico.                                */
   function tarjetaProducto(p) {
+    var v = p.variantes[0];
+    var hayVarias = p.variantes.length > 1;
+
+    var bloquePrecio = p.aConsultar
+      ? '<span class="producto__precio">A consultar</span>'
+      : '<span class="producto__precio' + (hayVarias ? ' producto__precio--desde' : '') + '">' +
+          (hayVarias ? 'Desde ' : '') + precio(p.desde) +
+          '<small>' + (hayVarias ? p.variantes.length + ' presentaciones' : v.nombre) + '</small>' +
+        '</span>';
+
     return '' +
       '<article class="producto">' +
         '<div class="producto__figura">' +
-          (p.etiqueta ? '<span class="producto__etiqueta">' + p.etiqueta + '</span>' : '') +
-          (p.kilos
-            ? '<span class="producto__kilos num">' + p.kilos + '<small>kg</small></span>'
-            : '<span class="producto__kilos num">' + p.unidad + '</span>') +
+          '<span class="producto__kilos num">' + p.formato + '</span>' +
         '</div>' +
         '<div class="producto__cuerpo">' +
           '<h3 class="producto__nombre">' +
             '<a href="producto.html?p=' + p.slug + '">' + p.nombre + '</a>' +
           '</h3>' +
-          '<p class="producto__desc">' + p.descripcion + '</p>' +
+          (v.hayDiferencia
+            ? '<p class="producto__cc">Cuenta corriente: ' + precio(v.cuenta) + '</p>'
+            : '') +
           '<div class="producto__pie">' +
-            '<span class="producto__precio">' + precio(p.precio) +
-              '<small>por ' + p.unidad + '</small>' +
-            '</span>' +
-            '<button class="boton boton--principal boton--chico" data-agregar="' + p.slug + '">Agregar</button>' +
+            bloquePrecio +
+            (p.aConsultar
+              ? '<a class="boton boton--linea boton--chico" href="producto.html?p=' + p.slug + '">Ver</a>'
+              : hayVarias
+                ? '<a class="boton boton--principal boton--chico" href="producto.html?p=' + p.slug + '">Elegir</a>'
+                : '<button class="boton boton--principal boton--chico" data-agregar="' + p.slug + '">Agregar</button>') +
           '</div>' +
         '</div>' +
       '</article>';
@@ -68,23 +81,18 @@
     var cont = document.getElementById('destacados');
     if (!cont) return;
 
-    Datos.productos({ destacados: true, limite: 4 }).then(function (lista) {
+    Datos.productos({ destacados: true }).then(function (lista) {
       cont.innerHTML = lista.map(tarjetaProducto).join('');
 
       cont.querySelectorAll('[data-agregar]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           Datos.producto(btn.dataset.agregar).then(function (p) {
             if (!p) return;
-            Carrito.agregar(p, 1);
-            /* Confirmación en el mismo botón: el cliente ve qué pasó sin
-               que le tape la pantalla nada. */
+            Carrito.agregar(p, p.variantes[0], 1);
             var original = btn.textContent;
             btn.textContent = 'Agregado';
             btn.disabled = true;
-            setTimeout(function () {
-              btn.textContent = original;
-              btn.disabled = false;
-            }, 1200);
+            setTimeout(function () { btn.textContent = original; btn.disabled = false; }, 1200);
           });
         });
       });
@@ -96,12 +104,10 @@
     var sc = document.getElementById('resumenSucursales');
     if (sc) {
       Datos.sucursales().then(function (lista) {
-        sc.innerHTML = lista.slice(0, 3).map(function (s) {
-          return '<div class="dato"><strong>' + s.nombre + '</strong><span>' + s.direccion + '</span></div>';
-        }).join('') +
-        (lista.length > 3
-          ? '<div class="dato"><span>y ' + (lista.length - 3) + ' sucursal más</span></div>'
-          : '');
+        sc.innerHTML = lista.map(function (s) {
+          return '<div class="dato"><strong>' + s.nombre + '</strong></div>' +
+                 '<div class="dato"><span>' + s.horario + '</span></div>';
+        }).join('');
       });
     }
 
