@@ -276,12 +276,12 @@
   /* ======================================================================
      PORTADA — banners, destacados y más vendidos
      ====================================================================== */
-  var TONOS = [
-    { id: 'azul',  nombre: 'Azul' },
-    { id: 'rojo',  nombre: 'Rojo' },
-    { id: 'hielo', nombre: 'Claro' },
-  ];
+  var ANCHO_MAXIMO = 1800;      /* a lo ancho, en píxeles */
+  var CALIDAD = 0.85;
 
+  /* ======================================================================
+     PORTADA — flyers del carrusel, destacados y más vendidos
+     ====================================================================== */
   function pintarPortada(resaltarUltimo) {
     Promise.all([Datos.portada(), Datos.productos({})]).then(function (r) {
       var port = r[0], todos = r[1];
@@ -289,14 +289,23 @@
       function guardar() { return Datos.guardarPortada(port).then(pintarPestanas); }
 
       vista.innerHTML = '' +
-        '<div class="admin__barra"><h2>Carteles de la portada</h2>' +
-          '<button class="boton boton--principal boton--chico" id="nuevoBanner">Agregar otro cartel</button>' +
+        '<div class="admin__barra"><h2>Flyers de la portada</h2></div>' +
+        '<p class="admin__ayuda">Son las imágenes que se van deslizando arriba de todo. ' +
+          'Se ven mejor apaisadas, más o menos <strong>1800 × 780 px</strong>. ' +
+          'Si son más grandes, las achicamos solas.</p>' +
+
+        '<div class="soltar" id="soltar">' +
+          '<input type="file" id="archivos" accept="image/*" multiple class="hidden">' +
+          '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg>' +
+          '<strong>Arrastrá los flyers acá</strong>' +
+          '<span>o tocá para elegirlos. Podés cargar varios de una vez.</span>' +
         '</div>' +
-        '<p class="admin__ayuda">Se van deslizando solos arriba de todo. Sirven para promos, ' +
-          'novedades o avisos. Podés apagar uno sin borrarlo, y ordenarlos con las flechitas. ' +
-          'Hay ' + port.banners.length + ' cartel' + (port.banners.length === 1 ? '' : 'es') + ' cargado' +
-          (port.banners.length === 1 ? '' : 's') + '.</p>' +
-        '<div id="listaBanners">' + port.banners.map(cajaBanner).join('') + '</div>' +
+        '<div id="progreso" class="progreso hidden"></div>' +
+
+        (port.banners.length
+          ? '<div class="flyers">' + port.banners.map(cajaFlyer).join('') + '</div>'
+          : '<p class="admin__ayuda">Todavía no cargaste ninguno. Mientras tanto, en la portada ' +
+            'se muestra un cartel provisorio que va a desaparecer solo cuando cargues el primero.</p>') +
 
         '<div class="admin__barra"><h2>Destacados</h2></div>' +
         '<p class="admin__ayuda">La primera fila de productos de la portada.</p>' +
@@ -306,141 +315,133 @@
         '<p class="admin__ayuda">La segunda fila de productos de la portada.</p>' +
         selectorProductos('masVendidos', port.masVendidos, todos);
 
-      /* Si acabamos de agregar uno, hay que llevar a la persona hasta él:
-         si no, se agrega abajo de todo y parece que el botón no hizo nada. */
+      conectarCarga(port, guardar);
+      conectarFlyers(port, guardar);
+      conectarFilas(port, guardar, todos);
+
       if (resaltarUltimo) {
-        var nuevo = vista.querySelector('.banner-edit:last-of-type');
+        var nuevo = vista.querySelector('.flyer:last-of-type');
         if (nuevo) {
-          nuevo.classList.add('banner-edit--nuevo');
+          nuevo.classList.add('flyer--nuevo');
           nuevo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          var titulo = nuevo.querySelector('[data-campo-banner="titulo"]');
-          if (titulo) setTimeout(function () { titulo.focus(); titulo.select(); }, 450);
-          setTimeout(function () { nuevo.classList.remove('banner-edit--nuevo'); }, 2200);
+          setTimeout(function () { nuevo.classList.remove('flyer--nuevo'); }, 2200);
         }
       }
-
-      /* --- Banners --- */
-      document.getElementById('nuevoBanner').addEventListener('click', function () {
-        port.banners.push({ etiqueta: '', titulo: 'Cartel nuevo', bajada: '', destacado: '',
-                            boton: 'Ver productos', link: 'productos.html', imagen: '',
-                            tono: 'azul', activo: true });
-        guardar().then(function () { pintarPortada(true); });
-      });
-
-      vista.querySelectorAll('[data-campo-banner]').forEach(function (el) {
-        el.addEventListener('change', function () {
-          var i = Number(el.dataset.i);
-          var campo = el.dataset.campoBanner;
-          port.banners[i][campo] = el.type === 'checkbox' ? el.checked : el.value;
-          guardar();
-        });
-      });
-
-      vista.querySelectorAll('[data-borrar-banner]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          if (!confirm('¿Borrar este cartel?')) return;
-          port.banners.splice(Number(b.dataset.borrarBanner), 1);
-          guardar().then(pintarPortada);
-        });
-      });
-
-      vista.querySelectorAll('[data-mover]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          var i = Number(b.dataset.i), j = i + Number(b.dataset.mover);
-          if (j < 0 || j >= port.banners.length) return;
-          var tmp = port.banners[i]; port.banners[i] = port.banners[j]; port.banners[j] = tmp;
-          guardar().then(pintarPortada);
-        });
-      });
-
-      conectarFotos(port, guardar);
-
-      /* --- Filas de productos --- */
-      ['destacados', 'masVendidos'].forEach(function (lista) {
-        var sel = document.getElementById('add_' + lista);
-        sel.addEventListener('change', function () {
-          if (!sel.value) return;
-          if (port[lista].indexOf(sel.value) === -1) port[lista].push(sel.value);
-          guardar().then(pintarPortada);
-        });
-        vista.querySelectorAll('[data-quitar-' + lista.toLowerCase() + ']').forEach(function (b) {
-          b.addEventListener('click', function () {
-            port[lista] = port[lista].filter(function (s) { return s !== b.dataset.slug; });
-            guardar().then(pintarPortada);
-          });
-        });
-      });
     });
   }
 
-  function cajaBanner(b, i) {
+  function cajaFlyer(b, i) {
     return '' +
-      '<div class="banner-edit' + (b.activo === false ? ' banner-edit--off' : '') + '">' +
-        '<div class="banner-edit__top">' +
-          '<strong>Cartel ' + (i + 1) + '</strong>' +
-          '<div class="banner-edit__acciones">' +
-            '<label class="tabla__check"><input type="checkbox" data-campo-banner="activo" data-i="' + i + '"' +
-              (b.activo !== false ? ' checked' : '') + '> Visible</label>' +
-            '<button class="chip" data-mover="-1" data-i="' + i + '" aria-label="Subir">↑</button>' +
-            '<button class="chip" data-mover="1" data-i="' + i + '" aria-label="Bajar">↓</button>' +
-            '<button class="chip chip--borrar" data-borrar-banner="' + i + '">Borrar</button>' +
-          '</div>' +
+      '<div class="flyer' + (b.activo === false ? ' flyer--off' : '') + '">' +
+        '<img class="flyer__previa" src="' + b.imagen + '" alt="" ' +
+          'onerror="this.closest(\'.flyer\').classList.add(\'flyer--sinsubir\')">' +
+        '<div class="flyer__falta">Todavía no está subida a GitHub</div>' +
+        '<div class="flyer__datos">' +
+          '<strong class="flyer__nombre">' + (b.imagen || '').split('/').pop() + '</strong>' +
+          (b.peso ? '<span class="flyer__peso">' + b.peso + '</span>' : '') +
+          '<label class="flyer__link"><span>Al tocarlo, lleva a (opcional)</span>' +
+            '<input type="text" data-link="' + i + '" value="' + (b.link || '').replace(/"/g, '&quot;') + '" ' +
+              'placeholder="productos.html?c=hielo"></label>' +
         '</div>' +
-        '<div class="banner-edit__campos">' +
-          campo('Etiqueta chica', 'etiqueta', b.etiqueta, i, 'Promo de la semana') +
-          campo('Título', 'titulo', b.titulo, i, 'Hielo para hoy') +
-          campo('Número o precio grande', 'destacado', b.destacado, i, '25% o $ 3.900') +
-          campo('Texto', 'bajada', b.bajada, i, 'Una línea explicando la promo') +
-          campo('Texto del botón', 'boton', b.boton, i, 'Ver productos') +
-          campo('Adónde lleva', 'link', b.link, i, 'productos.html?c=hielo') +
-          campoFoto(b.imagen, i) +
-          '<label class="campo"><span>Color</span>' +
-            '<select data-campo-banner="tono" data-i="' + i + '">' +
-              TONOS.map(function (t) {
-                return '<option value="' + t.id + '"' + (b.tono === t.id ? ' selected' : '') + '>' + t.nombre + '</option>';
-              }).join('') +
-            '</select>' +
-          '</label>' +
+        '<div class="flyer__acciones">' +
+          '<label class="tabla__check"><input type="checkbox" data-visible="' + i + '"' +
+            (b.activo !== false ? ' checked' : '') + '> Visible</label>' +
+          '<button class="chip" data-mover="-1" data-i="' + i + '" aria-label="Subir">↑</button>' +
+          '<button class="chip" data-mover="1" data-i="' + i + '" aria-label="Bajar">↓</button>' +
+          '<button class="chip chip--borrar" data-borrar-flyer="' + i + '">Borrar</button>' +
         '</div>' +
       '</div>';
   }
 
+  /* ---- Cargar imágenes ---------------------------------------------------
+     GitHub Pages no puede recibir archivos. Lo que hacemos es achicar la
+     imagen acá mismo y descargarla con el nombre correcto; después se sube
+     al repositorio como cualquier otro archivo.                            */
+  function conectarCarga(port, guardar) {
+    var zona = document.getElementById('soltar');
+    var input = document.getElementById('archivos');
+    var barra = document.getElementById('progreso');
 
-  /* ---- Foto del cartel ---------------------------------------------------
-     GitHub Pages no puede recibir archivos, así que no hay "subir" de verdad.
-     Lo que hacemos: achicamos la foto acá mismo, la descargamos con el nombre
-     correcto y completamos la ruta. La persona solo la sube al repositorio.  */
-  function campoFoto(valor, i) {
-    return '' +
-      '<label class="campo campo--foto"><span>Foto (opcional)</span>' +
-        '<div class="foto-caja">' +
-          (valor ? '<img class="foto-previa" src="' + valor + '" alt="" onerror="this.classList.add(\'foto-previa--falta\')">' : '') +
-          '<input type="file" accept="image/*" id="foto_' + i + '" class="hidden">' +
-          '<button type="button" class="boton boton--linea boton--chico" data-elegir-foto="' + i + '">' +
-            (valor ? 'Cambiar foto' : 'Elegir foto') + '</button>' +
-          (valor ? '<button type="button" class="chip chip--borrar" data-quitar-foto="' + i + '">Quitar</button>' : '') +
-        '</div>' +
-        '<input type="text" data-campo-banner="imagen" data-i="' + i + '" ' +
-          'value="' + String(valor || '').replace(/"/g, '&quot;') + '" placeholder="fotos/promo.jpg">' +
-        '<small class="campo__ayuda" id="ayudaFoto_' + i + '"></small>' +
-      '</label>';
+    zona.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () { procesar(input.files); });
+
+    ['dragenter', 'dragover'].forEach(function (e) {
+      zona.addEventListener(e, function (ev) {
+        ev.preventDefault(); zona.classList.add('soltar--activa');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (e) {
+      zona.addEventListener(e, function (ev) {
+        ev.preventDefault(); zona.classList.remove('soltar--activa');
+      });
+    });
+    zona.addEventListener('drop', function (ev) {
+      procesar(ev.dataTransfer.files);
+    });
+
+    function procesar(archivos) {
+      var lista = Array.prototype.slice.call(archivos)
+        .filter(function (f) { return f.type.indexOf('image/') === 0; });
+      if (!lista.length) return;
+
+      barra.classList.remove('hidden');
+      barra.textContent = 'Preparando ' + lista.length + (lista.length === 1 ? ' imagen…' : ' imágenes…');
+
+      var hechas = 0;
+      lista.reduce(function (cadena, archivo) {
+        return cadena.then(function () {
+          return optimizar(archivo).then(function (r) {
+            var nombre = nombreLimpio(archivo.name) + '.jpg';
+            descargar(r.blob, nombre);
+            port.banners.push({
+              imagen: 'fotos/' + nombre,
+              peso: tamano(archivo.size) + ' → ' + tamano(r.blob.size) + ', ' + r.ancho + '×' + r.alto,
+              link: '',
+              activo: true,
+            });
+            hechas++;
+            barra.textContent = 'Listas ' + hechas + ' de ' + lista.length + '…';
+            /* Un respiro entre descargas: si van todas juntas, el navegador
+               bloquea las que siguen. */
+            return new Promise(function (ok) { setTimeout(ok, 400); });
+          });
+        });
+      }, Promise.resolve()).then(function () {
+        guardar().then(function () { pintarPortada(true); });
+      }).catch(function () {
+        barra.textContent = 'Hubo un problema con alguna imagen. Probá con JPG o PNG.';
+      });
+    }
   }
 
-  /* Achica la imagen y la devuelve lista para descargar */
+  function descargar(blob, nombre) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nombre;
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  function tamano(bytes) {
+    return bytes > 1024 * 1024
+      ? (bytes / 1024 / 1024).toFixed(1) + ' MB'
+      : Math.round(bytes / 1024) + ' KB';
+  }
+
   function optimizar(archivo) {
     return new Promise(function (resolve, reject) {
       var lector = new FileReader();
       lector.onload = function () {
         var img = new Image();
         img.onload = function () {
-          var ancho = Math.min(img.width, 1600);
+          var ancho = Math.min(img.width, ANCHO_MAXIMO);
           var alto = Math.round(img.height * (ancho / img.width));
           var lienzo = document.createElement('canvas');
           lienzo.width = ancho; lienzo.height = alto;
           lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
           lienzo.toBlob(function (blob) {
             resolve({ blob: blob, ancho: ancho, alto: alto });
-          }, 'image/jpeg', 0.82);
+          }, 'image/jpeg', CALIDAD);
         };
         img.onerror = reject;
         img.src = lector.result;
@@ -456,60 +457,55 @@
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
-      .slice(0, 40) || 'imagen';
+      .slice(0, 40) || 'flyer';
   }
 
-  function conectarFotos(port, guardar) {
-    vista.querySelectorAll('[data-elegir-foto]').forEach(function (btn) {
-      var i = btn.dataset.elegirFoto;
-      var input = document.getElementById('foto_' + i);
-      var ayuda = document.getElementById('ayudaFoto_' + i);
+  function conectarFlyers(port, guardar) {
+    vista.querySelectorAll('[data-link]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        port.banners[Number(el.dataset.link)].link = el.value.trim();
+        guardar();
+      });
+    });
+    vista.querySelectorAll('[data-visible]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        port.banners[Number(el.dataset.visible)].activo = el.checked;
+        guardar().then(function () { pintarPortada(); });
+      });
+    });
+    vista.querySelectorAll('[data-mover]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = Number(b.dataset.i), j = i + Number(b.dataset.mover);
+        if (j < 0 || j >= port.banners.length) return;
+        var t = port.banners[i]; port.banners[i] = port.banners[j]; port.banners[j] = t;
+        guardar().then(function () { pintarPortada(); });
+      });
+    });
+    vista.querySelectorAll('[data-borrar-flyer]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!confirm('¿Sacar este flyer de la portada?')) return;
+        port.banners.splice(Number(b.dataset.borrarFlyer), 1);
+        guardar().then(function () { pintarPortada(); });
+      });
+    });
+  }
 
-      btn.addEventListener('click', function () { input.click(); });
-
-      input.addEventListener('change', function () {
-        var archivo = input.files[0];
-        if (!archivo) return;
-        ayuda.textContent = 'Optimizando…';
-
-        optimizar(archivo).then(function (r) {
-          var nombre = nombreLimpio(archivo.name) + '.jpg';
-          var ruta = 'fotos/' + nombre;
-
-          /* Se descarga ya optimizada y con el nombre correcto */
-          var a = document.createElement('a');
-          a.href = URL.createObjectURL(r.blob);
-          a.download = nombre;
-          a.click();
-          URL.revokeObjectURL(a.href);
-
-          port.banners[Number(i)].imagen = ruta;
-          guardar().then(function () {
-            var kb = Math.round(r.blob.size / 1024);
-            ayuda.innerHTML = 'Se descargó <strong>' + nombre + '</strong> (' + r.ancho + '×' + r.alto +
-              ', ' + kb + ' KB). Subila a GitHub dentro de una carpeta llamada ' +
-              '<strong>fotos</strong> y va a aparecer sola.';
-            var texto = vista.querySelector('[data-campo-banner="imagen"][data-i="' + i + '"]');
-            if (texto) texto.value = ruta;
-          });
-        }).catch(function () {
-          ayuda.textContent = 'No pude leer esa imagen. Probá con un JPG o PNG.';
+  function conectarFilas(port, guardar, todos) {
+    ['destacados', 'masVendidos'].forEach(function (lista) {
+      var sel = document.getElementById('add_' + lista);
+      if (!sel) return;
+      sel.addEventListener('change', function () {
+        if (!sel.value) return;
+        if (port[lista].indexOf(sel.value) === -1) port[lista].push(sel.value);
+        guardar().then(function () { pintarPortada(); });
+      });
+      vista.querySelectorAll('[data-quitar-' + lista.toLowerCase() + ']').forEach(function (b) {
+        b.addEventListener('click', function () {
+          port[lista] = port[lista].filter(function (s) { return s !== b.dataset.slug; });
+          guardar().then(function () { pintarPortada(); });
         });
       });
     });
-
-    vista.querySelectorAll('[data-quitar-foto]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        port.banners[Number(b.dataset.quitarFoto)].imagen = '';
-        guardar().then(pintarPortada);
-      });
-    });
-  }
-
-  function campo(rotulo, nombre, valor, i, ejemplo) {
-    return '<label class="campo"><span>' + rotulo + '</span>' +
-           '<input type="text" data-campo-banner="' + nombre + '" data-i="' + i + '" ' +
-           'value="' + String(valor || '').replace(/"/g, '&quot;') + '" placeholder="' + ejemplo + '"></label>';
   }
 
   function selectorProductos(lista, slugs, todos) {
@@ -594,10 +590,7 @@
     return '' +
       '  var BANNERS = [\n' +
       port.banners.map(function (b) {
-        return '    { etiqueta: ' + txt(b.etiqueta) + ', titulo: ' + txt(b.titulo) +
-               ', bajada: ' + txt(b.bajada) + ', destacado: ' + txt(b.destacado) +
-               ', boton: ' + txt(b.boton) + ', link: ' + txt(b.link) +
-               ', imagen: ' + txt(b.imagen) + ', tono: ' + txt(b.tono || 'azul') +
+        return '    { imagen: ' + txt(b.imagen) + ', link: ' + txt(b.link) +
                ', activo: ' + (b.activo !== false) + ' },';
       }).join('\n') +
       '\n  ];\n\n' +

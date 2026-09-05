@@ -231,41 +231,10 @@
      Si preferís tocarlo a mano, también se puede.                          */
 
 
-  /* Los carteles que se van deslizando arriba de todo */
+  /* Los flyers que se van deslizando arriba de todo.
+     Son solo imágenes: el diseño va adentro de la foto.
+     Se cargan desde el panel interno, en la pestaña "Portada".            */
   var BANNERS = [
-    {
-      etiqueta: 'Retiro sin mínimo',
-      titulo: 'Hielo para hoy',
-      bajada: 'Pasá por Viamonte 3646 y llevate lo que necesites. Sin mínimo de compra.',
-      destacado: '',
-      boton: 'Ver hielo',
-      link: 'productos.html?c=hielo',
-      imagen: '',
-      tono: 'azul',
-      activo: true,
-    },
-    {
-      etiqueta: 'Pagando en el momento',
-      titulo: 'Efectivo, transferencia o débito',
-      bajada: 'Siempre te sale menos que con cuenta corriente. La diferencia la ves en cada producto.',
-      destacado: '',
-      boton: 'Ver el catálogo',
-      link: 'productos.html',
-      imagen: '',
-      tono: 'rojo',
-      activo: true,
-    },
-    {
-      etiqueta: 'Todo en un solo pedido',
-      titulo: 'Bebidas, congelados y copetín',
-      bajada: 'Cerveza por cajón, empanadas, pizzas, papas y picada. Te llega junto con el hielo.',
-      destacado: '141 productos',
-      boton: 'Ver categorías',
-      link: 'productos.html',
-      imagen: '',
-      tono: 'hielo',
-      activo: true,
-    },
   ];
 
   /* Los que aparecen en "Destacados" y en "Los más vendidos".

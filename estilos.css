@@ -1166,10 +1166,9 @@ p { margin: 0 0 1em; }
   position: relative;
   flex: 0 0 100%;
   scroll-snap-align: center;
-  min-height: 380px;
-  display: flex;
-  align-items: flex-end;
-  padding: 100px 40px 40px;
+  aspect-ratio: 1800 / 780;
+  display: block;
+  padding: 0;
   border-radius: var(--radio);
   overflow: hidden;
   color: var(--blanco);
@@ -1178,6 +1177,17 @@ p { margin: 0 0 1em; }
 }
 .banner:hover { text-decoration: none; }
 
+.banner--provisorio {
+  aspect-ratio: auto;
+  min-height: 380px;
+  display: flex;
+  align-items: flex-end;
+  padding: 100px 40px 40px;
+}
+@media (max-width: 700px) {
+  .banner--provisorio { min-height: 340px; padding: 96px 24px 26px; }
+}
+
 .banner--rojo  { background: var(--rojo); }
 .banner--hielo { background: var(--hielo); color: var(--tinta); }
 .banner--hielo .banner__etiqueta { background: var(--rojo); color: var(--blanco); }
@@ -1185,7 +1195,7 @@ p { margin: 0 0 1em; }
 .banner--hielo .banner__bajada   { color: var(--tinta-suave); }
 
 /* Textura de escarcha, igual que en el hero */
-.banner::before {
+.banner--provisorio::before {
   content: '';
   position: absolute; inset: 0;
   background-image:
@@ -1196,7 +1206,7 @@ p { margin: 0 0 1em; }
           mask-image: radial-gradient(ellipse 60% 90% at 85% 12%, #000, transparent 70%);
   pointer-events: none;
 }
-.banner--hielo::before {
+.banner--provisorio.banner--hielo::before {
   background-image:
     linear-gradient(var(--escarcha) 1px, transparent 1px),
     linear-gradient(90deg, var(--escarcha) 1px, transparent 1px);
@@ -1212,7 +1222,7 @@ p { margin: 0 0 1em; }
   background: linear-gradient(90deg, rgba(11,59,119,.92) 0%, rgba(11,59,119,.55) 55%, transparent 100%);
 }
 
-.banner__cuerpo { position: relative; z-index: 1; max-width: 30rem; }
+.banner__cuerpo { position: relative; z-index: 1; max-width: 34rem; }
 .banner__etiqueta {
   display: inline-block;
   margin-bottom: 12px;
@@ -1280,7 +1290,7 @@ p { margin: 0 0 1em; }
 .carrusel__flecha--der { right: 24px; }
 @media (max-width: 700px) {
   .carrusel__flecha { display: none; }
-  .banner { min-height: 320px; padding: 92px 24px 24px; }
+  .banner { aspect-ratio: 4 / 3; }
   .banners { margin-top: -72px; }
 }
 
@@ -1409,27 +1419,83 @@ p { margin: 0 0 1em; }
 }
 .pastilla button:hover { background: var(--rojo); color: var(--blanco); }
 
-/* ---------- 33. FOTO DEL CARTEL (panel) ---------------------------------- */
-.campo--foto { grid-column: 1 / -1; }
-.foto-caja { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-.foto-previa {
-  width: 78px; height: 52px;
+/* ---------- 33. CARGA DE FLYERS (panel) ---------------------------------- */
+.soltar {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 38px 24px;
+  margin-bottom: 18px;
+  border: 2px dashed var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--hielo);
+  color: var(--tinta-suave);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.soltar:hover, .soltar--activa { border-color: var(--azul); background: var(--azul-humo); }
+.soltar strong { color: var(--azul); font-size: 1.05rem; }
+.soltar span { font-size: .92rem; }
+
+.progreso {
+  padding: 12px 16px; margin-bottom: 16px;
+  border-radius: var(--radio-chico);
+  background: var(--azul-humo);
+  font-size: .93rem; font-weight: 600; color: var(--azul);
+}
+
+.flyers { display: grid; gap: 12px; }
+
+.flyer {
+  position: relative;
+  display: grid;
+  grid-template-columns: 190px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+}
+.flyer--off { opacity: .5; }
+.flyer--nuevo { border-color: var(--azul); box-shadow: 0 0 0 4px var(--azul-humo); animation: aparece .5s ease; }
+
+.flyer__previa {
+  width: 100%; aspect-ratio: 1800 / 780;
   object-fit: cover;
   border-radius: var(--radio-chico);
-  border: 1px solid var(--escarcha);
   background: var(--hielo);
 }
-/* Si la foto todavía no está subida a GitHub, no se ve: se avisa */
-.foto-previa--falta { display: none; }
-.campo--foto .campo__ayuda { line-height: 1.5; }
+.flyer--sinsubir .flyer__previa { display: none; }
 
-/* El cartel recién agregado se resalta un momento, si no queda perdido
-   al final de la lista y parece que el botón no hizo nada. */
-.banner-edit--nuevo {
-  border-color: var(--azul);
-  box-shadow: 0 0 0 4px var(--azul-humo);
-  animation: aparece .5s ease;
+.flyer__falta {
+  display: none;
+  align-items: center; justify-content: center;
+  aspect-ratio: 1800 / 780;
+  padding: 10px;
+  border-radius: var(--radio-chico);
+  background: #FFF7E6; border: 1px dashed #E0C489;
+  color: #7A5600; font-size: .8rem; text-align: center;
 }
+.flyer--sinsubir .flyer__falta { display: flex; }
+
+.flyer__datos { min-width: 0; }
+.flyer__nombre { display: block; font-size: .95rem; color: var(--tinta); word-break: break-all; }
+.flyer__peso { display: block; font-size: .82rem; color: var(--tinta-suave); margin-top: 2px; }
+.flyer__link { display: block; margin-top: 10px; }
+.flyer__link span { display: block; font-size: .78rem; font-weight: 700; color: var(--tinta-suave); margin-bottom: 4px; }
+.flyer__link input {
+  width: 100%; max-width: 320px; padding: 9px 11px;
+  border: 1px solid var(--escarcha); border-radius: var(--radio-chico);
+  font-family: var(--fuente); font-size: .9rem; color: var(--tinta); background: var(--blanco);
+}
+.flyer__acciones { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
+.flyer__acciones .tabla__check { display: flex; align-items: center; gap: 6px; font-size: .84rem; color: var(--tinta-suave); }
+
+@media (max-width: 720px) {
+  .flyer { grid-template-columns: 1fr; }
+  .flyer__acciones { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; }
+}
+
 @keyframes aparece {
   from { transform: translateY(-8px); opacity: .4; }
   to   { transform: none; opacity: 1; }

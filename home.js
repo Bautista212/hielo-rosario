@@ -13,24 +13,29 @@
     if (!cont) return;
 
     Datos.banners().then(function (lista) {
-      if (!lista.length) { cont.closest('.banners').classList.add('hidden'); return; }
+      /* Mientras no haya flyers cargados se muestra un cartel provisorio,
+         para que la portada no arranque vacía. Desaparece solo cuando
+         cargan el primero desde el panel. */
+      if (!lista.length) {
+        cont.innerHTML =
+          '<div class="banner banner--provisorio">' +
+            '<div class="banner__cuerpo">' +
+              '<h2 class="banner__titulo">Hielo, bebidas y congelados</h2>' +
+              '<p class="banner__bajada">Retiro en Viamonte 3646 sin mínimo de compra, ' +
+                'o envío a domicilio en Rosario.</p>' +
+              '<a class="banner__boton" href="productos.html">Ver el catálogo</a>' +
+            '</div>' +
+          '</div>';
+        return;
+      }
 
       cont.innerHTML =
         '<div class="carrusel__pista" id="pista">' +
           lista.map(function (b) {
-            return '' +
-              '<a class="banner banner--' + (b.tono || 'azul') + '" href="' + (b.link || 'productos.html') + '">' +
-                (b.imagen
-                  ? '<img class="banner__foto" src="' + b.imagen + '" alt=""><span class="banner__velo"></span>'
-                  : '') +
-                '<div class="banner__cuerpo">' +
-                  (b.etiqueta ? '<span class="banner__etiqueta">' + b.etiqueta + '</span>' : '') +
-                  '<h2 class="banner__titulo">' + b.titulo + '</h2>' +
-                  (b.destacado ? '<span class="banner__destacado num">' + b.destacado + '</span>' : '') +
-                  (b.bajada ? '<p class="banner__bajada">' + b.bajada + '</p>' : '') +
-                  (b.boton ? '<span class="banner__boton">' + b.boton + '</span>' : '') +
-                '</div>' +
-              '</a>';
+            var img = '<img class="banner__foto" src="' + b.imagen + '" alt="" loading="lazy">';
+            return b.link
+              ? '<a class="banner" href="' + b.link + '">' + img + '</a>'
+              : '<div class="banner">' + img + '</div>';
           }).join('') +
         '</div>' +
         (lista.length > 1
@@ -41,7 +46,7 @@
             '<div class="carrusel__puntos" id="puntos">' +
               lista.map(function (_, i) {
                 return '<button class="carrusel__punto' + (i === 0 ? ' carrusel__punto--activo' : '') +
-                       '" data-i="' + i + '" aria-label="Ver cartel ' + (i + 1) + '"></button>';
+                       '" data-i="' + i + '" aria-label="Ver flyer ' + (i + 1) + '"></button>';
               }).join('') +
             '</div>'
           : '');
