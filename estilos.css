@@ -140,26 +140,43 @@ p { margin: 0 0 1em; }
 .boton[disabled] { opacity: .45; pointer-events: none; }
 
 /* ---------- 5. HEADER ---------------------------------------------------- */
-/* El menú se pega arriba al hacer scroll. La posición va en el contenedor
-   (#header) y no en la etiqueta de adentro: si va adentro, el contenedor
-   mide solo 68px y el menú no tiene dónde quedarse pegado. */
+/* El menú flota separado del borde de arriba, con fondo de vidrio.
+   La posición va en el contenedor (#header) y no en la etiqueta de adentro:
+   si va adentro, el contenedor mide solo lo que mide el menú y no tiene
+   dónde quedarse pegado al scrollear. */
 #header {
   position: sticky;
-  top: 0;
+  top: 14px;
   z-index: 50;
+  margin-top: 14px;
+  padding: 0 var(--gutter);
 }
 
 .header {
-  background: rgba(255, 255, 255, .96);
-  backdrop-filter: saturate(180%) blur(8px);
-  border-bottom: 1px solid var(--escarcha);
+  max-width: var(--ancho);
+  margin: 0 auto;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, .7);
+  background: rgba(255, 255, 255, .62);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  box-shadow: 0 10px 34px rgba(11, 59, 119, .13), 0 1px 0 rgba(255,255,255,.8) inset;
+  transition: box-shadow .2s ease, background-color .2s ease;
+}
+
+/* Al scrollear se vuelve un poco más sólido, para que el texto de atrás
+   no compita con el del menú. */
+#header.pegado .header {
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 12px 38px rgba(11, 59, 119, .18), 0 1px 0 rgba(255,255,255,.9) inset;
 }
 
 .header__fila {
   display: flex;
   align-items: center;
   gap: 20px;
-  height: 68px;
+  height: 64px;
+  padding: 0 10px 0 22px;
 }
 
 .logo {
@@ -236,13 +253,16 @@ p { margin: 0 0 1em; }
   .menu-btn { display: inline-flex; }
   .nav {
     position: absolute;
-    top: 68px; left: 0; right: 0;
+    top: 72px; left: 0; right: 0;
     flex-direction: column;
     gap: 0;
     margin: 0;
-    padding: 8px var(--gutter) 16px;
-    background: var(--blanco);
-    border-bottom: 1px solid var(--escarcha);
+    padding: 10px 14px 14px;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(20px) saturate(190%);
+    -webkit-backdrop-filter: blur(20px) saturate(190%);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 22px;
     box-shadow: var(--sombra);
   }
   .nav:not(.abierto) { display: none; }
@@ -257,6 +277,9 @@ p { margin: 0 0 1em; }
   background: var(--hielo);
   border-bottom: 1px solid var(--escarcha);
 }
+
+/* Las páginas internas empiezan pegadas al menú flotante: se les da aire */
+.cabecera { margin-top: -14px; padding-top: 84px; }
 
 /* Textura de escarcha: cubos apenas insinuados. Es el único adorno del sitio. */
 .hero::after {
@@ -312,6 +335,8 @@ p { margin: 0 0 1em; }
 }
 .estado[data-abierto="si"] .estado__punto { background: var(--verde); }
 .estado[data-abierto="no"] .estado__punto { background: var(--rojo); }
+
+.estado--centrado { display: flex; width: fit-content; margin: 0 auto 22px; }
 
 @media (max-width: 700px) {
   .hero__cuerpo { padding: 52px 0 48px; }
@@ -553,6 +578,8 @@ p { margin: 0 0 1em; }
   color: var(--tinta-suave);
 }
 .buscador:focus-within { border-color: var(--azul); }
+/* La lupa no se tiene que achicar cuando el espacio aprieta */
+.buscador svg { flex: none; }
 .buscador input {
   flex: 1;
   padding: 13px 0;
@@ -567,7 +594,7 @@ p { margin: 0 0 1em; }
 /* ---------- 16. FILTROS POR CATEGORÍA ------------------------------------ */
 .barra-filtros {
   position: sticky;
-  top: 68px;
+  top: 92px;
   z-index: 40;
   background: rgba(255,255,255,.97);
   backdrop-filter: saturate(180%) blur(8px);
@@ -735,7 +762,7 @@ p { margin: 0 0 1em; }
 /* ---------- 20. IMAGEN DE PRODUCTO EN LA TARJETA ------------------------- */
 .producto__img { width: 100%; height: 100%; object-fit: cover; }
 
-@media (max-width: 900px) { .barra-filtros { top: 68px; } }
+@media (max-width: 900px) { .barra-filtros { top: 86px; } }
 @media (max-width: 560px) {
   .producto__pie { align-items: center; }
   .contador__btn { width: 32px; height: 32px; }
@@ -853,7 +880,7 @@ p { margin: 0 0 1em; }
 /* --- Resumen --- */
 .checkout__resumen {
   position: sticky;
-  top: 92px;
+  top: 110px;
   padding: 24px;
   border: 1px solid var(--escarcha);
   border-radius: var(--radio);
@@ -934,7 +961,7 @@ p { margin: 0 0 1em; }
 .check span { font-size: .97rem; color: var(--tinta); }
 
 .resultado {
-  position: sticky; top: 92px;
+  position: sticky; top: 110px;
   padding: 28px;
   border: 1px solid var(--escarcha);
   border-radius: var(--radio);
@@ -1118,3 +1145,266 @@ p { margin: 0 0 1em; }
 .publicar__pasos strong { color: var(--tinta); }
 .publicar .boton { margin-right: 10px; }
 .publicar__nota { margin-top: 22px; font-size: .87rem; color: var(--tinta-suave); }
+
+/* ---------- 29. BANNER DESLIZABLE ---------------------------------------- */
+.banners { margin-top: -78px; padding-bottom: 8px; }
+
+.carrusel { position: relative; }
+
+.carrusel__pista {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 14px;
+  scrollbar-width: none;
+  border-radius: var(--radio);
+}
+.carrusel__pista::-webkit-scrollbar { display: none; }
+
+.banner {
+  position: relative;
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  min-height: 380px;
+  display: flex;
+  align-items: flex-end;
+  padding: 100px 40px 40px;
+  border-radius: var(--radio);
+  overflow: hidden;
+  color: var(--blanco);
+  text-decoration: none;
+  background: var(--azul);
+}
+.banner:hover { text-decoration: none; }
+
+.banner--rojo  { background: var(--rojo); }
+.banner--hielo { background: var(--hielo); color: var(--tinta); }
+.banner--hielo .banner__etiqueta { background: var(--rojo); color: var(--blanco); }
+.banner--hielo .banner__titulo   { color: var(--azul); }
+.banner--hielo .banner__bajada   { color: var(--tinta-suave); }
+
+/* Textura de escarcha, igual que en el hero */
+.banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.16) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 90% at 85% 12%, #000, transparent 70%);
+          mask-image: radial-gradient(ellipse 60% 90% at 85% 12%, #000, transparent 70%);
+  pointer-events: none;
+}
+.banner--hielo::before {
+  background-image:
+    linear-gradient(var(--escarcha) 1px, transparent 1px),
+    linear-gradient(90deg, var(--escarcha) 1px, transparent 1px);
+}
+
+.banner__foto {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.banner__velo {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(11,59,119,.92) 0%, rgba(11,59,119,.55) 55%, transparent 100%);
+}
+
+.banner__cuerpo { position: relative; z-index: 1; max-width: 30rem; }
+.banner__etiqueta {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  background: rgba(255,255,255,.2);
+  font-size: .82rem;
+  font-weight: 700;
+}
+.banner__titulo {
+  font-size: clamp(1.7rem, 4vw, 2.7rem);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.08;
+  margin: 0 0 10px;
+  color: inherit;
+}
+.banner__destacado {
+  display: block;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.banner__bajada { font-size: 1.02rem; margin-bottom: 20px; opacity: .92; }
+.banner__boton {
+  display: inline-flex; align-items: center;
+  padding: 12px 22px;
+  border-radius: var(--radio-chico);
+  background: var(--blanco);
+  color: var(--azul);
+  font-weight: 700;
+  font-size: .96rem;
+}
+.banner--hielo .banner__boton { background: var(--rojo); color: var(--blanco); }
+
+/* Puntitos y flechas */
+.carrusel__puntos { display: flex; justify-content: center; gap: 7px; margin-top: 16px; }
+.carrusel__punto {
+  width: 8px; height: 8px; padding: 0;
+  border: 0; border-radius: 50%;
+  background: var(--escarcha);
+  cursor: pointer;
+  transition: width .2s ease, background-color .2s ease;
+}
+.carrusel__punto--activo { width: 26px; border-radius: 4px; background: var(--azul); }
+
+.carrusel__flecha {
+  position: absolute;
+  bottom: 26px;
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 50%;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--azul);
+  cursor: pointer;
+  z-index: 2;
+}
+.carrusel__flecha:hover { background: var(--blanco); }
+.carrusel__flecha--izq { right: 78px; }
+.carrusel__flecha--der { right: 24px; }
+@media (max-width: 700px) {
+  .carrusel__flecha { display: none; }
+  .banner { min-height: 320px; padding: 92px 24px 24px; }
+  .banners { margin-top: -72px; }
+}
+
+/* ---------- 30. BUSCADOR DE LA PORTADA ----------------------------------- */
+.buscar-inicio { position: relative; max-width: 620px; margin: 0 auto; }
+.buscar-inicio .buscador {
+  max-width: none;
+  padding: 4px 6px 4px 16px;
+  border-radius: 100px;
+  box-shadow: var(--sombra);
+}
+.buscar-inicio .buscador input { padding: 15px 0; font-size: 1.05rem; }
+.buscar-inicio .boton { border-radius: 100px; white-space: nowrap; }
+
+@media (max-width: 460px) {
+  .buscar-inicio .buscador { padding-left: 14px; }
+  .buscar-inicio .buscador input { font-size: 1rem; padding: 13px 0; }
+  .buscar-inicio .boton { padding: 11px 16px; font-size: .9rem; }
+}
+
+.sugerencias {
+  position: absolute;
+  top: calc(100% + 8px); left: 0; right: 0;
+  z-index: 30;
+  padding: 6px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+  max-height: 340px;
+  overflow-y: auto;
+}
+.sugerencias:empty { display: none; }
+.sugerencia {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 11px 13px;
+  border-radius: var(--radio-chico);
+  color: var(--tinta);
+  text-decoration: none;
+}
+.sugerencia:hover { background: var(--hielo); text-decoration: none; }
+.sugerencia__nombre { font-weight: 600; font-size: .95rem; }
+.sugerencia__precio { font-weight: 800; color: var(--azul); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sugerencias__vacio { padding: 14px; color: var(--tinta-suave); font-size: .93rem; }
+
+/* ---------- 31. DESPLEGABLE DE CATEGORÍAS -------------------------------- */
+.cats-toggle { display: flex; justify-content: center; margin-top: 18px; }
+.cats-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+  margin-top: 22px;
+}
+.cats-panel[hidden] { display: none; }
+.cat-chip {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio-chico);
+  background: var(--blanco);
+  color: var(--tinta);
+  text-decoration: none;
+}
+.cat-chip:hover { border-color: var(--azul); background: var(--azul-humo); text-decoration: none; }
+.cat-chip strong { color: var(--azul); font-size: 1rem; }
+.cat-chip span { font-size: .84rem; color: var(--tinta-suave); }
+
+/* ---------- 32. EDITOR DE PORTADA (panel) -------------------------------- */
+.banner-edit {
+  padding: 18px;
+  margin-bottom: 12px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+}
+.banner-edit--off { opacity: .55; }
+.banner-edit__top {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+}
+.banner-edit__top strong { color: var(--azul); }
+.banner-edit__acciones { display: flex; align-items: center; gap: 7px; }
+.banner-edit__acciones .tabla__check {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .85rem; color: var(--tinta-suave); margin-right: 6px;
+}
+.banner-edit__campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.banner-edit__campos .campo { margin: 0; }
+.banner-edit__campos .campo span {
+  display: block; font-size: .8rem; font-weight: 700;
+  color: var(--tinta-suave); margin-bottom: 5px;
+}
+.banner-edit__campos select {
+  width: 100%; padding: 12px 14px;
+  border: 1px solid var(--escarcha); border-radius: var(--radio-chico);
+  font-family: var(--fuente); font-size: 1rem; background: var(--blanco); color: var(--tinta);
+}
+
+.fila-edit {
+  padding: 16px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  margin-bottom: 26px;
+}
+.fila-edit__elegidos { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.fila-edit__vacio { font-size: .9rem; color: var(--tinta-suave); }
+.fila-edit select {
+  width: 100%; max-width: 380px; padding: 11px 13px;
+  border: 1px solid var(--escarcha); border-radius: var(--radio-chico);
+  font-family: var(--fuente); font-size: .95rem; background: var(--blanco); color: var(--tinta);
+}
+
+.pastilla {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 8px 7px 13px;
+  border-radius: 100px;
+  background: var(--azul-humo);
+  font-size: .89rem; font-weight: 600; color: var(--azul);
+}
+.pastilla button {
+  width: 20px; height: 20px;
+  border: 0; border-radius: 50%;
+  background: rgba(11,59,119,.14);
+  color: var(--azul); font-size: .9rem; line-height: 1; cursor: pointer;
+}
+.pastilla button:hover { background: var(--rojo); color: var(--blanco); }

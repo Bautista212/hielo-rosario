@@ -61,10 +61,12 @@
   /* ---- Pestañas ----------------------------------------------------------- */
   function pintarPestanas() {
     var pendientes = Datos.hayCambiosSinExportar();
+    var marca = (pendientes || Datos.hayPortadaModificada()) ? ' •' : '';
     var items = [
       { id: 'pedidos',  texto: 'Pedidos' },
       { id: 'productos',texto: 'Productos y precios' },
-      { id: 'publicar', texto: 'Publicar' + (pendientes ? ' (' + pendientes + ')' : '') },
+      { id: 'portada',  texto: 'Portada' },
+      { id: 'publicar', texto: 'Publicar' + marca },
     ];
     pestanas.innerHTML = items.map(function (i) {
       return '<button class="chip' + (estado.pestana === i.id ? ' chip--activo' : '') +
@@ -82,6 +84,7 @@
   function pintarVista() {
     if (estado.pestana === 'pedidos')   return pintarPedidos();
     if (estado.pestana === 'productos') return pintarProductos();
+    if (estado.pestana === 'portada')   return pintarPortada();
     return pintarPublicar();
   }
 
@@ -269,19 +272,167 @@
     });
   }
 
+
+  /* ======================================================================
+     PORTADA — banners, destacados y más vendidos
+     ====================================================================== */
+  var TONOS = [
+    { id: 'azul',  nombre: 'Azul' },
+    { id: 'rojo',  nombre: 'Rojo' },
+    { id: 'hielo', nombre: 'Claro' },
+  ];
+
+  function pintarPortada() {
+    Promise.all([Datos.portada(), Datos.productos({})]).then(function (r) {
+      var port = r[0], todos = r[1];
+
+      function guardar() { return Datos.guardarPortada(port).then(pintarPestanas); }
+
+      vista.innerHTML = '' +
+        '<div class="admin__barra"><h2>Carteles de la portada</h2>' +
+          '<button class="boton boton--linea boton--chico" id="nuevoBanner">Agregar cartel</button>' +
+        '</div>' +
+        '<p class="admin__ayuda">Se van deslizando solos arriba de todo. Sirven para promos, ' +
+          'novedades o avisos. Podés apagar uno sin borrarlo.</p>' +
+        '<div id="listaBanners">' + port.banners.map(cajaBanner).join('') + '</div>' +
+
+        '<div class="admin__barra"><h2>Destacados</h2></div>' +
+        '<p class="admin__ayuda">La primera fila de productos de la portada.</p>' +
+        selectorProductos('destacados', port.destacados, todos) +
+
+        '<div class="admin__barra"><h2>Los más vendidos</h2></div>' +
+        '<p class="admin__ayuda">La segunda fila de productos de la portada.</p>' +
+        selectorProductos('masVendidos', port.masVendidos, todos);
+
+      /* --- Banners --- */
+      document.getElementById('nuevoBanner').addEventListener('click', function () {
+        port.banners.push({ etiqueta: '', titulo: 'Cartel nuevo', bajada: '', destacado: '',
+                            boton: 'Ver productos', link: 'productos.html', imagen: '',
+                            tono: 'azul', activo: true });
+        guardar().then(pintarPortada);
+      });
+
+      vista.querySelectorAll('[data-campo-banner]').forEach(function (el) {
+        el.addEventListener('change', function () {
+          var i = Number(el.dataset.i);
+          var campo = el.dataset.campoBanner;
+          port.banners[i][campo] = el.type === 'checkbox' ? el.checked : el.value;
+          guardar();
+        });
+      });
+
+      vista.querySelectorAll('[data-borrar-banner]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (!confirm('¿Borrar este cartel?')) return;
+          port.banners.splice(Number(b.dataset.borrarBanner), 1);
+          guardar().then(pintarPortada);
+        });
+      });
+
+      vista.querySelectorAll('[data-mover]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var i = Number(b.dataset.i), j = i + Number(b.dataset.mover);
+          if (j < 0 || j >= port.banners.length) return;
+          var tmp = port.banners[i]; port.banners[i] = port.banners[j]; port.banners[j] = tmp;
+          guardar().then(pintarPortada);
+        });
+      });
+
+      /* --- Filas de productos --- */
+      ['destacados', 'masVendidos'].forEach(function (lista) {
+        var sel = document.getElementById('add_' + lista);
+        sel.addEventListener('change', function () {
+          if (!sel.value) return;
+          if (port[lista].indexOf(sel.value) === -1) port[lista].push(sel.value);
+          guardar().then(pintarPortada);
+        });
+        vista.querySelectorAll('[data-quitar-' + lista.toLowerCase() + ']').forEach(function (b) {
+          b.addEventListener('click', function () {
+            port[lista] = port[lista].filter(function (s) { return s !== b.dataset.slug; });
+            guardar().then(pintarPortada);
+          });
+        });
+      });
+    });
+  }
+
+  function cajaBanner(b, i) {
+    return '' +
+      '<div class="banner-edit' + (b.activo === false ? ' banner-edit--off' : '') + '">' +
+        '<div class="banner-edit__top">' +
+          '<strong>Cartel ' + (i + 1) + '</strong>' +
+          '<div class="banner-edit__acciones">' +
+            '<label class="tabla__check"><input type="checkbox" data-campo-banner="activo" data-i="' + i + '"' +
+              (b.activo !== false ? ' checked' : '') + '> Visible</label>' +
+            '<button class="chip" data-mover="-1" data-i="' + i + '" aria-label="Subir">↑</button>' +
+            '<button class="chip" data-mover="1" data-i="' + i + '" aria-label="Bajar">↓</button>' +
+            '<button class="chip chip--borrar" data-borrar-banner="' + i + '">Borrar</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="banner-edit__campos">' +
+          campo('Etiqueta chica', 'etiqueta', b.etiqueta, i, 'Promo de la semana') +
+          campo('Título', 'titulo', b.titulo, i, 'Hielo para hoy') +
+          campo('Número o precio grande', 'destacado', b.destacado, i, '25% o $ 3.900') +
+          campo('Texto', 'bajada', b.bajada, i, 'Una línea explicando la promo') +
+          campo('Texto del botón', 'boton', b.boton, i, 'Ver productos') +
+          campo('Adónde lleva', 'link', b.link, i, 'productos.html?c=hielo') +
+          campo('Foto (opcional)', 'imagen', b.imagen, i, 'fotos/promo.jpg') +
+          '<label class="campo"><span>Color</span>' +
+            '<select data-campo-banner="tono" data-i="' + i + '">' +
+              TONOS.map(function (t) {
+                return '<option value="' + t.id + '"' + (b.tono === t.id ? ' selected' : '') + '>' + t.nombre + '</option>';
+              }).join('') +
+            '</select>' +
+          '</label>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function campo(rotulo, nombre, valor, i, ejemplo) {
+    return '<label class="campo"><span>' + rotulo + '</span>' +
+           '<input type="text" data-campo-banner="' + nombre + '" data-i="' + i + '" ' +
+           'value="' + String(valor || '').replace(/"/g, '&quot;') + '" placeholder="' + ejemplo + '"></label>';
+  }
+
+  function selectorProductos(lista, slugs, todos) {
+    var elegidos = slugs.map(function (s) {
+      return todos.find(function (p) { return p.slug === s; });
+    }).filter(Boolean);
+
+    return '' +
+      '<div class="fila-edit">' +
+        '<div class="fila-edit__elegidos">' +
+          (elegidos.length
+            ? elegidos.map(function (p) {
+                return '<span class="pastilla">' + p.nombre +
+                       '<button data-quitar-' + lista.toLowerCase() + ' data-slug="' + p.slug +
+                       '" aria-label="Quitar">×</button></span>';
+              }).join('')
+            : '<span class="fila-edit__vacio">Todavía no elegiste ninguno.</span>') +
+        '</div>' +
+        '<select id="add_' + lista + '">' +
+          '<option value="">Agregar un producto…</option>' +
+          todos.filter(function (p) { return slugs.indexOf(p.slug) === -1; })
+               .map(function (p) { return '<option value="' + p.slug + '">' + p.nombre + '</option>'; }).join('') +
+        '</select>' +
+      '</div>';
+  }
+
   /* ======================================================================
      PUBLICAR — regenera datos.js con los cambios
      ====================================================================== */
   function pintarPublicar() {
     var n = Datos.hayCambiosSinExportar();
+    var portadaTocada = Datos.hayPortadaModificada();
 
     vista.innerHTML = '' +
       '<div class="publicar">' +
         '<h2>Publicar los cambios</h2>' +
-        (n
+        ((n || portadaTocada)
           ? '<p class="publicar__estado publicar__estado--pendiente">' +
-              'Tenés ' + n + (n === 1 ? ' producto modificado' : ' productos modificados') +
-              ' que todavía solo ves vos.</p>'
+              [n ? n + (n === 1 ? ' producto modificado' : ' productos modificados') : '',
+               portadaTocada ? 'la portada modificada' : ''].filter(Boolean).join(' y ') +
+              '. Por ahora eso lo ves solo vos.</p>'
           : '<p class="publicar__estado">No hay cambios pendientes. Todo lo que ves es lo que ven los clientes.</p>') +
 
         '<ol class="publicar__pasos">' +
@@ -291,9 +442,9 @@
           '<li>En un minuto la página se actualiza sola para todo el mundo.</li>' +
         '</ol>' +
 
-        '<button class="boton boton--principal" id="descargar"' + (n ? '' : ' disabled') + '>' +
+        '<button class="boton boton--principal" id="descargar"' + ((n || portadaTocada) ? '' : ' disabled') + '>' +
           'Descargar datos.js</button>' +
-        (n ? '<button class="boton boton--linea" id="descartar">Descartar mis cambios</button>' : '') +
+        ((n || portadaTocada) ? '<button class="boton boton--linea" id="descartar">Descartar mis cambios</button>' : '') +
 
         '<p class="publicar__nota">Este paso existe porque todavía no conectamos la base de datos. ' +
           'Cuando la conectemos, los precios se van a actualizar solos y esta pestaña desaparece.</p>' +
@@ -305,13 +456,13 @@
     var x = document.getElementById('descartar');
     if (x) x.addEventListener('click', function () {
       if (confirm('¿Descartar todos los cambios y volver a los precios publicados?')) {
+        localStorage.removeItem('hr_portada');
         Datos.descartarCambios().then(function () { location.reload(); });
       }
     });
   }
 
   function textoDeLinea(p) {
-    function txt(s) { return "'" + String(s).replace(/'/g, "\\'") + "'"; }
     var vars = '[' + p.variantes.map(function (v) {
       return '[' + txt(v[0]) + ',' + v[1] + ',' + v[2] + ']';
     }).join(',') + ']';
@@ -319,24 +470,53 @@
                     vars, txt(p.descripcion), txt(p.imagen)].join(', ') + '],';
   }
 
-  function descargarArchivo() {
-    /* Se lee el datos.js que está publicado y se le reemplaza solo el bloque
-       de productos. Así el resto del archivo queda intacto. */
-    Promise.all([fetch('datos.js').then(function (r) { return r.text(); }), Datos.lineasDelArchivo()])
-      .then(function (r) {
-        var texto = r[0], productos = r[1];
+  function txt(s) { return "'" + String(s == null ? '' : s).replace(/'/g, "\\'") + "'"; }
 
-        var ini = texto.indexOf('var LISTA = [');
-        var fin = texto.indexOf('\n  ];', ini);
-        if (ini === -1 || fin === -1) {
+  function bloquePortada(port) {
+    return '' +
+      '  var BANNERS = [\n' +
+      port.banners.map(function (b) {
+        return '    { etiqueta: ' + txt(b.etiqueta) + ', titulo: ' + txt(b.titulo) +
+               ', bajada: ' + txt(b.bajada) + ', destacado: ' + txt(b.destacado) +
+               ', boton: ' + txt(b.boton) + ', link: ' + txt(b.link) +
+               ', imagen: ' + txt(b.imagen) + ', tono: ' + txt(b.tono || 'azul') +
+               ', activo: ' + (b.activo !== false) + ' },';
+      }).join('\n') +
+      '\n  ];\n\n' +
+      '  var DESTACADOS = [' + port.destacados.map(txt).join(', ') + '];\n\n' +
+      '  var MAS_VENDIDOS = [' + port.masVendidos.map(txt).join(', ') + '];\n\n';
+  }
+
+  function reemplazar(texto, marcaIni, marcaFin, contenido) {
+    var a = texto.indexOf(marcaIni);
+    var b = texto.indexOf(marcaFin);
+    if (a === -1 || b === -1) return null;
+    return texto.slice(0, a) + marcaIni + '\n' + contenido + '  ' + texto.slice(b);
+  }
+
+  function descargarArchivo() {
+    /* Se lee el datos.js publicado y se le reemplazan solo los dos bloques
+       editables. El resto del archivo queda intacto. */
+    Promise.all([
+      fetch('datos.js?v=' + Date.now()).then(function (r) { return r.text(); }),
+      Datos.lineasDelArchivo(),
+      Datos.portada(),
+    ]).then(function (r) {
+        var texto = r[0], productos = r[1], port = r[2];
+
+        texto = reemplazar(texto, '/* === INICIO PORTADA === */', '/* === FIN PORTADA === */',
+          bloquePortada(port));
+
+        if (texto) {
+          texto = reemplazar(texto, '/* === INICIO PRODUCTOS === */', '  ];',
+            '  var LISTA = [\n\n' + productos.map(textoDeLinea).join('\n') + '\n');
+        }
+
+        if (!texto) {
           alert('No pude leer el archivo datos.js. Avisale a quien armó la página.');
           return;
         }
-
-        var nuevo = texto.slice(0, ini) +
-          'var LISTA = [\n\n' +
-          productos.map(textoDeLinea).join('\n') +
-          '\n' + texto.slice(fin + 1);
+        var nuevo = texto;
 
         var a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([nuevo], { type: 'text/javascript' }));

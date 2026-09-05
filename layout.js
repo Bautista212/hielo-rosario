@@ -243,6 +243,17 @@
 
     actualizarContador();
     document.addEventListener('carrito', actualizarContador);
+
+    /* El menú se vuelve un poco más sólido apenas se scrollea, para que
+       el texto de atrás no compita con el de arriba. */
+    var caja = document.getElementById('header');
+    if (caja) {
+      var marcar = function () {
+        caja.classList.toggle('pegado', window.scrollY > 12);
+      };
+      marcar();
+      window.addEventListener('scroll', marcar, { passive: true });
+    }
   }
 
   if (document.readyState === 'loading') {

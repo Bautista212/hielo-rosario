@@ -16,6 +16,8 @@
   /* La categoría puede venir en la dirección: productos.html?c=cervezas */
   var params = new URLSearchParams(location.search);
   estado.categoria = params.get('c') || '';
+  estado.buscar    = params.get('q') || '';
+  if (estado.buscar) buscador.value = estado.buscar;
 
   /* ---- Filtros ----------------------------------------------------------- */
   function pintarFiltros() {

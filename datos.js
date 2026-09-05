@@ -47,6 +47,7 @@
   /* ======================================================================
      PRODUCTOS
      ====================================================================== */
+  /* === INICIO PRODUCTOS === */
   var LISTA = [
 
   /* ---- HIELO ------------------------------------------------------------
@@ -225,10 +226,56 @@
 
   ];
 
-  /* ---- QUÉ SE MUESTRA EN LA PORTADA -------------------------------------
-     Poné acá los slugs que querés destacar en la home. Cambiá el orden o
-     los nombres cuando quieras: la portada se actualiza sola.             */
+  /* === INICIO PORTADA === */
+  /* Todo esto se edita desde el panel interno, en la pestaña "Portada".
+     Si preferís tocarlo a mano, también se puede.                          */
+
+
+  /* Los carteles que se van deslizando arriba de todo */
+  var BANNERS = [
+    {
+      etiqueta: 'Retiro sin mínimo',
+      titulo: 'Hielo para hoy',
+      bajada: 'Pasá por Viamonte 3646 y llevate lo que necesites. Sin mínimo de compra.',
+      destacado: '',
+      boton: 'Ver hielo',
+      link: 'productos.html?c=hielo',
+      imagen: '',
+      tono: 'azul',
+      activo: true,
+    },
+    {
+      etiqueta: 'Pagando en el momento',
+      titulo: 'Efectivo, transferencia o débito',
+      bajada: 'Siempre te sale menos que con cuenta corriente. La diferencia la ves en cada producto.',
+      destacado: '',
+      boton: 'Ver el catálogo',
+      link: 'productos.html',
+      imagen: '',
+      tono: 'rojo',
+      activo: true,
+    },
+    {
+      etiqueta: 'Todo en un solo pedido',
+      titulo: 'Bebidas, congelados y copetín',
+      bajada: 'Cerveza por cajón, empanadas, pizzas, papas y picada. Te llega junto con el hielo.',
+      destacado: '141 productos',
+      boton: 'Ver categorías',
+      link: 'productos.html',
+      imagen: '',
+      tono: 'hielo',
+      activo: true,
+    },
+  ];
+
+  /* Los que aparecen en "Destacados" y en "Los más vendidos".
+     Son los identificadores (slug) de cada producto.                       */
   var DESTACADOS = ['hielo-cubos-5kg', 'coca-15', 'quilmes-473', 'carbon-changuito'];
+
+  var MAS_VENDIDOS = ['hielo-cubos-3kg', 'fernet-branca', 'stella-473', 'pizza-muzarella',
+                      'emp-gamma-carne', 'papas-170'];
+
+  /* === FIN PORTADA === */
 
   /* ======================================================================
      De acá para abajo no hace falta tocar nada.
@@ -295,8 +342,8 @@
       var lista = PRODUCTOS.filter(function (p) { return p.activo; });
 
       if (o.categoria) lista = lista.filter(function (p) { return p.categoria === o.categoria; });
-      if (o.destacados) {
-        lista = DESTACADOS
+      if (o.slugs) {
+        lista = o.slugs
           .map(function (sl) { return lista.find(function (p) { return p.slug === sl; }); })
           .filter(Boolean);
       }
@@ -307,6 +354,32 @@
       if (o.limite) lista = lista.slice(0, o.limite);
 
       return responder(lista);
+    },
+
+    /* --- Portada --------------------------------------------------------- */
+    banners: function () {
+      var g = {};
+      try { g = JSON.parse(localStorage.getItem('hr_portada') || '{}'); } catch (e) {}
+      return responder((g.banners || BANNERS).filter(function (b) { return b.activo !== false; }));
+    },
+
+    portada: function () {
+      var g = {};
+      try { g = JSON.parse(localStorage.getItem('hr_portada') || '{}'); } catch (e) {}
+      return responder({
+        banners: g.banners || BANNERS,
+        destacados: g.destacados || DESTACADOS,
+        masVendidos: g.masVendidos || MAS_VENDIDOS,
+      });
+    },
+
+    guardarPortada: function (datos) {
+      localStorage.setItem('hr_portada', JSON.stringify(datos));
+      return responder(true);
+    },
+
+    hayPortadaModificada: function () {
+      return !!localStorage.getItem('hr_portada');
     },
 
     producto: function (slug) {
