@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mi pedido — Hielo Rosario</title>
-<meta name="description" content="Revisá tu pedido y elegí cómo lo recibís.">
+<meta name="description" content="Revisá tu pedido, elegí retiro en el local o envío a domicilio y confirmalo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -15,13 +15,43 @@
 <div id="header"></div>
 
 <main>
+  <section class="cabecera">
+    <div class="contenedor"><h1>Mi pedido</h1></div>
+  </section>
+
   <section class="seccion">
     <div class="contenedor">
-      <div class="aviso aviso--obra">
-        <h2>Mi pedido</h2>
-        <p>Revisá tu pedido y elegí cómo lo recibís. Esta pantalla se arma en el próximo paso.</p>
-        <a class="boton boton--azul" href="index.html">Volver al inicio</a>
+
+      <div id="vacio" class="aviso aviso--obra hidden">
+        <h2>Todavía no agregaste nada</h2>
+        <p>Armá tu pedido desde el catálogo y volvé acá para cerrarlo.</p>
+        <a class="boton boton--principal" href="productos.html">Ver productos</a>
       </div>
+
+      <div id="contenido" class="checkout hidden">
+        <div class="checkout__cuerpo">
+
+          <section class="bloque">
+            <h2 class="bloque__titulo">Productos</h2>
+            <div id="items"></div>
+            <a class="checkout__seguir" href="productos.html">Seguir agregando</a>
+          </section>
+
+          <section class="bloque">
+            <h2 class="bloque__titulo">Cómo lo recibís</h2>
+            <div class="opciones" id="entrega"></div>
+          </section>
+
+          <section class="bloque">
+            <h2 class="bloque__titulo">Tus datos</h2>
+            <div id="formulario"></div>
+          </section>
+
+        </div>
+
+        <aside class="checkout__resumen" id="resumen"></aside>
+      </div>
+
     </div>
   </section>
 </main>
@@ -32,5 +62,6 @@
 <script src="carrito.js"></script>
 <script src="datos.js"></script>
 <script src="layout.js"></script>
+<script src="pedido.js"></script>
 </body>
 </html>

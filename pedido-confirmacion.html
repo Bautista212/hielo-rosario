@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pedido confirmado — Hielo Rosario</title>
 <meta name="description" content="Recibimos tu pedido.">
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -17,11 +18,7 @@
 <main>
   <section class="seccion">
     <div class="contenedor">
-      <div class="aviso aviso--obra">
-        <h2>Pedido confirmado</h2>
-        <p>Recibimos tu pedido. Esta pantalla se arma en el próximo paso.</p>
-        <a class="boton boton--azul" href="index.html">Volver al inicio</a>
-      </div>
+      <div id="confirmacion"><p class="cargando">Cargando…</p></div>
     </div>
   </section>
 </main>
@@ -32,5 +29,6 @@
 <script src="carrito.js"></script>
 <script src="datos.js"></script>
 <script src="layout.js"></script>
+<script src="pedido-confirmacion.js"></script>
 </body>
 </html>
