@@ -338,6 +338,8 @@
         });
       });
 
+      conectarFotos(port, guardar);
+
       /* --- Filas de productos --- */
       ['destacados', 'masVendidos'].forEach(function (lista) {
         var sel = document.getElementById('add_' + lista);
@@ -376,7 +378,7 @@
           campo('Texto', 'bajada', b.bajada, i, 'Una línea explicando la promo') +
           campo('Texto del botón', 'boton', b.boton, i, 'Ver productos') +
           campo('Adónde lleva', 'link', b.link, i, 'productos.html?c=hielo') +
-          campo('Foto (opcional)', 'imagen', b.imagen, i, 'fotos/promo.jpg') +
+          campoFoto(b.imagen, i) +
           '<label class="campo"><span>Color</span>' +
             '<select data-campo-banner="tono" data-i="' + i + '">' +
               TONOS.map(function (t) {
@@ -386,6 +388,107 @@
           '</label>' +
         '</div>' +
       '</div>';
+  }
+
+
+  /* ---- Foto del cartel ---------------------------------------------------
+     GitHub Pages no puede recibir archivos, así que no hay "subir" de verdad.
+     Lo que hacemos: achicamos la foto acá mismo, la descargamos con el nombre
+     correcto y completamos la ruta. La persona solo la sube al repositorio.  */
+  function campoFoto(valor, i) {
+    return '' +
+      '<label class="campo campo--foto"><span>Foto (opcional)</span>' +
+        '<div class="foto-caja">' +
+          (valor ? '<img class="foto-previa" src="' + valor + '" alt="" onerror="this.classList.add(\'foto-previa--falta\')">' : '') +
+          '<input type="file" accept="image/*" id="foto_' + i + '" class="hidden">' +
+          '<button type="button" class="boton boton--linea boton--chico" data-elegir-foto="' + i + '">' +
+            (valor ? 'Cambiar foto' : 'Elegir foto') + '</button>' +
+          (valor ? '<button type="button" class="chip chip--borrar" data-quitar-foto="' + i + '">Quitar</button>' : '') +
+        '</div>' +
+        '<input type="text" data-campo-banner="imagen" data-i="' + i + '" ' +
+          'value="' + String(valor || '').replace(/"/g, '&quot;') + '" placeholder="fotos/promo.jpg">' +
+        '<small class="campo__ayuda" id="ayudaFoto_' + i + '"></small>' +
+      '</label>';
+  }
+
+  /* Achica la imagen y la devuelve lista para descargar */
+  function optimizar(archivo) {
+    return new Promise(function (resolve, reject) {
+      var lector = new FileReader();
+      lector.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var ancho = Math.min(img.width, 1600);
+          var alto = Math.round(img.height * (ancho / img.width));
+          var lienzo = document.createElement('canvas');
+          lienzo.width = ancho; lienzo.height = alto;
+          lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
+          lienzo.toBlob(function (blob) {
+            resolve({ blob: blob, ancho: ancho, alto: alto });
+          }, 'image/jpeg', 0.82);
+        };
+        img.onerror = reject;
+        img.src = lector.result;
+      };
+      lector.onerror = reject;
+      lector.readAsDataURL(archivo);
+    });
+  }
+
+  function nombreLimpio(nombre) {
+    return nombre.replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40) || 'imagen';
+  }
+
+  function conectarFotos(port, guardar) {
+    vista.querySelectorAll('[data-elegir-foto]').forEach(function (btn) {
+      var i = btn.dataset.elegirFoto;
+      var input = document.getElementById('foto_' + i);
+      var ayuda = document.getElementById('ayudaFoto_' + i);
+
+      btn.addEventListener('click', function () { input.click(); });
+
+      input.addEventListener('change', function () {
+        var archivo = input.files[0];
+        if (!archivo) return;
+        ayuda.textContent = 'Optimizando…';
+
+        optimizar(archivo).then(function (r) {
+          var nombre = nombreLimpio(archivo.name) + '.jpg';
+          var ruta = 'fotos/' + nombre;
+
+          /* Se descarga ya optimizada y con el nombre correcto */
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(r.blob);
+          a.download = nombre;
+          a.click();
+          URL.revokeObjectURL(a.href);
+
+          port.banners[Number(i)].imagen = ruta;
+          guardar().then(function () {
+            var kb = Math.round(r.blob.size / 1024);
+            ayuda.innerHTML = 'Se descargó <strong>' + nombre + '</strong> (' + r.ancho + '×' + r.alto +
+              ', ' + kb + ' KB). Subila a GitHub dentro de una carpeta llamada ' +
+              '<strong>fotos</strong> y va a aparecer sola.';
+            var texto = vista.querySelector('[data-campo-banner="imagen"][data-i="' + i + '"]');
+            if (texto) texto.value = ruta;
+          });
+        }).catch(function () {
+          ayuda.textContent = 'No pude leer esa imagen. Probá con un JPG o PNG.';
+        });
+      });
+    });
+
+    vista.querySelectorAll('[data-quitar-foto]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        port.banners[Number(b.dataset.quitarFoto)].imagen = '';
+        guardar().then(pintarPortada);
+      });
+    });
   }
 
   function campo(rotulo, nombre, valor, i, ejemplo) {
