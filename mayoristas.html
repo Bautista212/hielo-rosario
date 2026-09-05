@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mayoristas — Hielo Rosario</title>
-<meta name="description" content="Precios y condiciones para bares y restaurantes.">
+<title>Para comercios — Hielo Rosario</title>
+<meta name="description" content="Bares, restaurantes, kioscos y salones: cuenta corriente, precios por volumen y entrega programada en Rosario.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -15,13 +15,71 @@
 <div id="header"></div>
 
 <main>
+  <section class="cabecera">
+    <div class="contenedor">
+      <h1>Para comercios</h1>
+      <p class="cabecera__bajada">
+        Si tenés un bar, un restaurante, un kiosco o un salón de eventos, trabajamos
+        distinto: cajas y cajones en vez de unidades, entrega programada y la opción
+        de cuenta corriente.
+      </p>
+      <div class="acciones-wa" id="whatsapps"></div>
+    </div>
+  </section>
+
   <section class="seccion">
     <div class="contenedor">
-      <div class="aviso aviso--obra">
-        <h2>Mayoristas</h2>
-        <p>Precios y condiciones para bares y restaurantes. Esta pantalla se arma en el próximo paso.</p>
-        <a class="boton boton--azul" href="index.html">Volver al inicio</a>
+      <div class="seccion__intro"><h2>Cómo funciona</h2></div>
+      <div class="duo">
+        <div class="panel">
+          <h3>Comprás por volumen</h3>
+          <p>Casi todo el catálogo tiene presentación por caja, cajón o pack: cerveza x24,
+             vinos x6, aperitivos x12, congelados x5 kg. El precio por unidad baja bastante
+             respecto de comprar suelto.</p>
+          <a class="boton boton--linea" href="productos.html">Ver el catálogo</a>
+        </div>
+        <div class="panel">
+          <h3>Podés pagar después</h3>
+          <p>Con cuenta corriente retirás o recibís la mercadería y la abonás después.
+             Los precios de esa lista son más altos que los de contado, porque incluyen
+             el costo de la financiación. En cada producto de la web ves los dos.</p>
+          <a class="boton boton--linea" href="preguntas-frecuentes.html">Cómo se abre la cuenta</a>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--azul">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Qué te podemos proveer</h2>
+        <p>Todo en un solo proveedor, en una sola entrega.</p>
+      </div>
+      <div class="pasos">
+        <div class="paso">
+          <h3>Hielo</h3>
+          <p>El corazón del negocio. Cubos, escamas y barras para barra y cámara.</p>
+        </div>
+        <div class="paso">
+          <h3>Bebidas</h3>
+          <p>Gaseosas, cervezas, aguas, vinos, aperitivos y energizantes por cajón.</p>
+        </div>
+        <div class="paso">
+          <h3>Congelados y copetín</h3>
+          <p>Empanadas, pizzas, hamburguesas, papas, vegetales y picada.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Empezar</h2>
+        <p>Escribinos contándonos de qué rubro sos y qué necesitás habitualmente.
+           Te armamos una propuesta con precios y frecuencia de entrega.</p>
+      </div>
+      <a class="boton boton--principal" href="contacto.html">Contactarnos</a>
     </div>
   </section>
 </main>
@@ -32,5 +90,6 @@
 <script src="carrito.js"></script>
 <script src="datos.js"></script>
 <script src="layout.js"></script>
+<script src="contacto.js"></script>
 </body>
 </html>

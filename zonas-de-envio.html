@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zonas de envío — Hielo Rosario</title>
-<meta name="description" content="Hasta dónde llegamos y cuánto cuesta.">
+<title>Zonas y costos de envío — Hielo Rosario</title>
+<meta name="description" content="Hasta dónde llega Hielo Rosario y cuánto cuesta el envío a domicilio. Sin mínimo de compra si el pedido incluye hielo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -15,13 +15,53 @@
 <div id="header"></div>
 
 <main>
+  <section class="cabecera">
+    <div class="contenedor">
+      <h1>Envíos</h1>
+      <p class="cabecera__bajada">
+        Llevamos tu pedido a domicilio en Rosario y alrededores. También podés
+        retirarlo por el local sin costo y sin mínimo de compra.
+      </p>
+    </div>
+  </section>
+
   <section class="seccion">
     <div class="contenedor">
-      <div class="aviso aviso--obra">
-        <h2>Zonas de envío</h2>
-        <p>Hasta dónde llegamos y cuánto cuesta. Esta pantalla se arma en el próximo paso.</p>
-        <a class="boton boton--azul" href="index.html">Volver al inicio</a>
+      <div class="seccion__intro">
+        <h2>Zonas y costos</h2>
+        <p>El costo se suma al total del pedido y se abona junto con la entrega.</p>
       </div>
+      <div class="zonas" id="zonas"><p class="cargando">Cargando…</p></div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--fria">
+    <div class="contenedor">
+      <div class="seccion__intro"><h2>Cuándo hay mínimo de compra</h2></div>
+      <div class="duo">
+        <div class="panel">
+          <h3>Retirando por el local</h3>
+          <p>Nunca hay mínimo. Pasás por <strong id="direccionLocal">Viamonte 3646</strong>,
+             retirás lo que compraste y listo, sea un pedido chico o grande.</p>
+          <a class="boton boton--linea" href="sucursales.html">Ver dónde estamos</a>
+        </div>
+        <div class="panel">
+          <h3>Con envío a domicilio</h3>
+          <p>El mínimo es <strong id="minimo">$ 8.000</strong>, salvo que el pedido
+             incluya hielo: en ese caso tampoco hay mínimo.</p>
+          <a class="boton boton--linea" href="productos.html?c=hielo">Ver hielo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="seccion__intro"><h2>¿No aparece tu zona?</h2>
+        <p>Si estás fuera de estas zonas, escribinos y vemos si podemos llegar.
+           Para pedidos grandes casi siempre se puede.</p>
+      </div>
+      <a class="boton boton--principal" href="contacto.html">Escribinos</a>
     </div>
   </section>
 </main>
@@ -32,5 +72,6 @@
 <script src="carrito.js"></script>
 <script src="datos.js"></script>
 <script src="layout.js"></script>
+<script src="zonas-de-envio.js"></script>
 </body>
 </html>

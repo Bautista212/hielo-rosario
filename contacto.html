@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contacto — Hielo Rosario</title>
-<meta name="description" content="Escribinos o llamanos.">
+<meta name="description" content="Escribinos por WhatsApp o pasá por Viamonte 3646, Rosario. Lunes a sábados de 7 a 20.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -15,12 +15,55 @@
 <div id="header"></div>
 
 <main>
+  <section class="cabecera">
+    <div class="contenedor">
+      <div class="estado" id="estado" data-abierto="">
+        <span class="estado__punto"></span>
+        <span id="estadoTexto">Consultando horario</span>
+      </div>
+      <h1>Contacto</h1>
+      <p class="cabecera__bajada">
+        La forma más rápida es el WhatsApp. Te respondemos en el día.
+      </p>
+      <div class="acciones-wa" id="whatsapps"></div>
+    </div>
+  </section>
+
   <section class="seccion">
     <div class="contenedor">
-      <div class="aviso aviso--obra">
-        <h2>Contacto</h2>
-        <p>Escribinos o llamanos. Esta pantalla se arma en el próximo paso.</p>
-        <a class="boton boton--azul" href="index.html">Volver al inicio</a>
+      <div class="duo">
+        <div class="panel">
+          <h3>Dónde estamos</h3>
+          <div class="dato"><strong>Dirección</strong><span id="direccion"></span></div>
+          <div class="dato"><strong>Horarios</strong><span>Lunes a sábados de 7 a 20.<br>Domingos y feriados de 8:30 a 16.</span></div>
+          <div class="dato"><strong>Teléfono</strong><span><a id="telefono" href="#"></a></span></div>
+          <div class="dato"><strong>Mail</strong><span><a id="mail" href="#"></a></span></div>
+          <a class="boton boton--linea" href="sucursales.html">Ver en el mapa</a>
+        </div>
+        <div class="panel panel--limpio">
+          <iframe id="mapa" class="sucursal__mapa" loading="lazy" title="Dónde estamos"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--fria">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Antes de escribir</h2>
+        <p>Puede que la respuesta ya esté acá y te ahorres la espera.</p>
+      </div>
+      <div class="duo">
+        <div class="panel">
+          <h3>Preguntas frecuentes</h3>
+          <p>Mínimos de compra, formas de pago, tiempos de entrega y cómo funciona la cuenta corriente.</p>
+          <a class="boton boton--linea" href="preguntas-frecuentes.html">Ver preguntas</a>
+        </div>
+        <div class="panel">
+          <h3>Sos un comercio</h3>
+          <p>Bares, restaurantes, kioscos y salones tienen precios y condiciones distintas.</p>
+          <a class="boton boton--linea" href="mayoristas.html">Ver condiciones</a>
+        </div>
       </div>
     </div>
   </section>
@@ -32,5 +75,6 @@
 <script src="carrito.js"></script>
 <script src="datos.js"></script>
 <script src="layout.js"></script>
+<script src="contacto.js"></script>
 </body>
 </html>

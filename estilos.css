@@ -922,3 +922,94 @@ p { margin: 0 0 1em; }
 .detalle__datos { margin-top: 18px; font-size: .92rem; color: var(--tinta-suave); }
 .detalle__datos p { margin: 0 0 5px; }
 .detalle__datos strong { color: var(--tinta); }
+
+/* ---------- 24. CALCULADORA DE EVENTOS ----------------------------------- */
+.calculadora { display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
+@media (max-width: 900px) { .calculadora { grid-template-columns: 1fr; } }
+
+.opciones--columna { grid-template-columns: 1fr; }
+
+.check { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 500; }
+.check input { width: 19px; height: 19px; accent-color: var(--azul); cursor: pointer; }
+.check span { font-size: .97rem; color: var(--tinta); }
+
+.resultado {
+  position: sticky; top: 92px;
+  padding: 28px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--hielo);
+  text-align: center;
+}
+@media (max-width: 900px) { .resultado { position: static; } }
+
+.resultado__num {
+  font-size: 3.6rem; font-weight: 800; color: var(--azul);
+  letter-spacing: -.04em; line-height: 1;
+}
+.resultado__num small { font-size: 1.2rem; margin-left: 4px; }
+.resultado__texto { margin: 10px 0 20px; color: var(--tinta-suave); font-size: .95rem; }
+
+.resultado__tips {
+  text-align: left; padding: 16px 0; margin-bottom: 18px;
+  border-top: 1px solid var(--escarcha); border-bottom: 1px solid var(--escarcha);
+  font-size: .88rem; color: var(--tinta-suave);
+}
+.resultado__tips p { margin: 0 0 8px; }
+.resultado__tips p:last-child { margin: 0; }
+.resultado__tips strong { color: var(--tinta); }
+
+.resultado__acciones { display: grid; gap: 9px; }
+
+/* ---------- 25. ZONAS DE ENVÍO ------------------------------------------- */
+.zonas { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.zona-card {
+  padding: 24px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+}
+.zona-card h3 { font-size: 1.15rem; margin-bottom: 4px; }
+.zona-card__lugares { font-size: .9rem; color: var(--tinta-suave); margin-bottom: 16px; min-height: 2.6em; }
+.zona-card__costo { font-size: 1.9rem; font-weight: 800; color: var(--azul); line-height: 1; }
+.zona-card__demora { font-size: .87rem; color: var(--tinta-suave); }
+
+/* ---------- 26. CONTACTO -------------------------------------------------- */
+.acciones-wa { display: flex; flex-wrap: wrap; gap: 10px; }
+.panel--limpio { padding: 0; overflow: hidden; }
+.panel--limpio .sucursal__mapa { border: 0; height: 100%; min-height: 320px; }
+
+/* ---------- 27. PREGUNTAS FRECUENTES ------------------------------------- */
+.faq { max-width: 720px; }
+.faq__grupo {
+  font-size: 1.05rem; font-weight: 800; color: var(--tinta-suave);
+  margin: 34px 0 10px;
+}
+.faq__grupo:first-child { margin-top: 0; }
+
+.faq__item { border-bottom: 1px solid var(--escarcha); }
+.faq__item summary {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 17px 0;
+  font-size: 1.03rem; font-weight: 700; color: var(--azul);
+  cursor: pointer; list-style: none;
+}
+.faq__item summary::-webkit-details-marker { display: none; }
+.faq__item summary::after {
+  content: '+';
+  flex: none;
+  font-size: 1.4rem; font-weight: 500; color: var(--tinta-suave);
+  transition: transform .2s ease;
+}
+.faq__item[open] summary::after { content: '–'; }
+.faq__item summary:hover { color: var(--azul-vivo); }
+
+.faq__cuerpo { padding: 0 0 18px; color: var(--tinta-suave); font-size: .97rem; max-width: 62ch; }
+.faq__cuerpo p { margin: 0 0 10px; }
+.faq__cuerpo .boton { margin-top: 4px; }
+
+.faq__pie {
+  max-width: 720px; margin-top: 40px; padding-top: 26px;
+  border-top: 1px solid var(--escarcha);
+}
+.faq__pie p { color: var(--tinta-suave); }

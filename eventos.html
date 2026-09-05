@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calculadora de hielo — Hielo Rosario</title>
-<meta name="description" content="Cuánto hielo necesitás para tu evento.">
+<title>¿Cuánto hielo necesito? — Hielo Rosario</title>
+<meta name="description" content="Calculá cuántos kilos de hielo necesitás según la cantidad de personas, las horas y el tipo de evento.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -15,12 +15,41 @@
 <div id="header"></div>
 
 <main>
+  <section class="cabecera">
+    <div class="contenedor">
+      <h1>¿Cuánto hielo necesito?</h1>
+      <p class="cabecera__bajada">
+        La pregunta que más nos hacen. Contanos cómo es el evento y te decimos
+        cuántos kilos calcular, para no quedarte corto ni comprar de más.
+      </p>
+    </div>
+  </section>
+
   <section class="seccion">
     <div class="contenedor">
-      <div class="aviso aviso--obra">
-        <h2>Calculadora de hielo</h2>
-        <p>Cuánto hielo necesitás para tu evento. Esta pantalla se arma en el próximo paso.</p>
-        <a class="boton boton--azul" href="index.html">Volver al inicio</a>
+      <div class="calculadora">
+        <div id="calculadora"></div>
+        <aside class="resultado" id="resultado"></aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--fria">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Para que el hielo dure</h2>
+      </div>
+      <div class="duo">
+        <div class="panel">
+          <h3>Guardalo cerrado y a la sombra</h3>
+          <p>Una conservadora cerrada al sol pierde bastante menos que una abierta a la sombra.
+             Abrila lo menos posible y no la dejes destapada.</p>
+        </div>
+        <div class="panel">
+          <h3>Separá el de enfriar del de tomar</h3>
+          <p>Conviene tener una conservadora para enfriar botellas y otra solo para el hielo
+             que va al vaso. Así no se contamina ni se derrite antes de tiempo.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -32,5 +61,6 @@
 <script src="carrito.js"></script>
 <script src="datos.js"></script>
 <script src="layout.js"></script>
+<script src="eventos.js"></script>
 </body>
 </html>
