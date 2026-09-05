@@ -127,6 +127,95 @@
       '</footer>';
   }
 
+
+  /* ======================================================================
+     UI — La tarjeta de producto, compartida por la portada, el catálogo y
+     los relacionados. Se cambia acá una vez y cambia en todos lados.
+     ====================================================================== */
+  window.UI = {
+
+    /* La figura: la foto si hay, si no el formato grande */
+    figura: function (p) {
+      var dentro = p.imagen
+        ? '<img src="' + p.imagen + '" alt="' + p.nombre + '" loading="lazy" class="producto__img">'
+        : '<span class="producto__kilos num">' + p.formato + '</span>';
+      return '<div class="producto__figura">' + dentro + '</div>';
+    },
+
+    tarjeta: function (p) {
+      var v = p.variantes[0];
+      var hayVarias = p.variantes.length > 1;
+      var enPedido = window.Carrito ? Carrito.cantidadDe(p.slug, v.nombre) : 0;
+
+      var bloquePrecio = p.aConsultar
+        ? '<span class="producto__precio">A consultar</span>'
+        : '<span class="producto__precio' + (hayVarias ? ' producto__precio--desde' : '') + '">' +
+            (hayVarias ? 'Desde ' : '') + precio(p.desde) +
+            '<small>' + (hayVarias ? p.variantes.length + ' presentaciones' : v.nombre) + '</small>' +
+          '</span>';
+
+      /* Si ya está en el pedido, el botón se convierte en un contador.
+         Así se suman unidades sin salir del catálogo. */
+      var accion;
+      if (p.aConsultar) {
+        accion = '<a class="boton boton--linea boton--chico" href="producto.html?p=' + p.slug + '">Ver</a>';
+      } else if (hayVarias) {
+        accion = '<a class="boton boton--principal boton--chico" href="producto.html?p=' + p.slug + '">Elegir</a>';
+      } else if (enPedido > 0) {
+        accion = UI.contador(p.slug + '|' + v.nombre, enPedido);
+      } else {
+        accion = '<button class="boton boton--principal boton--chico" data-agregar="' + p.slug + '">Agregar</button>';
+      }
+
+      return '' +
+        '<article class="producto">' +
+          UI.figura(p) +
+          '<div class="producto__cuerpo">' +
+            '<h3 class="producto__nombre">' +
+              '<a href="producto.html?p=' + p.slug + '">' + p.nombre + '</a>' +
+            '</h3>' +
+            (v.hayDiferencia ? '<p class="producto__cc">Cuenta corriente: ' + precio(v.cuenta) + '</p>' : '') +
+            '<div class="producto__pie">' + bloquePrecio + accion + '</div>' +
+          '</div>' +
+        '</article>';
+    },
+
+    /* Contador − 1 + */
+    contador: function (clave, cantidad) {
+      return '' +
+        '<div class="contador" data-clave="' + clave + '">' +
+          '<button class="contador__btn" data-paso="-1" aria-label="Quitar uno">−</button>' +
+          '<span class="contador__n num">' + cantidad + '</span>' +
+          '<button class="contador__btn" data-paso="1" aria-label="Agregar uno">+</button>' +
+        '</div>';
+    },
+
+    /* Conecta los botones de una grilla ya dibujada.
+       alRefrescar se llama cuando hay que volver a pintar las tarjetas. */
+    conectar: function (cont, alRefrescar) {
+      cont.querySelectorAll('[data-agregar]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          Datos.producto(btn.dataset.agregar).then(function (p) {
+            if (!p) return;
+            Carrito.agregar(p, p.variantes[0], 1);
+            if (alRefrescar) alRefrescar();
+          });
+        });
+      });
+
+      cont.querySelectorAll('.contador').forEach(function (c) {
+        c.querySelectorAll('.contador__btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var actual = Carrito.cantidadDeClave(c.dataset.clave);
+            Carrito.cambiarCantidad(c.dataset.clave, actual + Number(btn.dataset.paso));
+            if (alRefrescar) alRefrescar();
+          });
+        });
+      });
+    },
+
+  };
+
   /* ---- Contador del carrito en el header -------------------------------- */
   function actualizarContador() {
     var el = document.getElementById('cuentaCarrito');

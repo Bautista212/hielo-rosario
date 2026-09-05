@@ -39,63 +39,14 @@
     });
   }
 
-  /* ---- Productos destacados ---------------------------------------------
-     La tarjeta muestra el precio de contado grande y, solo si es distinto,
-     el de cuenta corriente abajo en chico.                                */
-  function tarjetaProducto(p) {
-    var v = p.variantes[0];
-    var hayVarias = p.variantes.length > 1;
-
-    var bloquePrecio = p.aConsultar
-      ? '<span class="producto__precio">A consultar</span>'
-      : '<span class="producto__precio' + (hayVarias ? ' producto__precio--desde' : '') + '">' +
-          (hayVarias ? 'Desde ' : '') + precio(p.desde) +
-          '<small>' + (hayVarias ? p.variantes.length + ' presentaciones' : v.nombre) + '</small>' +
-        '</span>';
-
-    return '' +
-      '<article class="producto">' +
-        '<div class="producto__figura">' +
-          '<span class="producto__kilos num">' + p.formato + '</span>' +
-        '</div>' +
-        '<div class="producto__cuerpo">' +
-          '<h3 class="producto__nombre">' +
-            '<a href="producto.html?p=' + p.slug + '">' + p.nombre + '</a>' +
-          '</h3>' +
-          (v.hayDiferencia
-            ? '<p class="producto__cc">Cuenta corriente: ' + precio(v.cuenta) + '</p>'
-            : '') +
-          '<div class="producto__pie">' +
-            bloquePrecio +
-            (p.aConsultar
-              ? '<a class="boton boton--linea boton--chico" href="producto.html?p=' + p.slug + '">Ver</a>'
-              : hayVarias
-                ? '<a class="boton boton--principal boton--chico" href="producto.html?p=' + p.slug + '">Elegir</a>'
-                : '<button class="boton boton--principal boton--chico" data-agregar="' + p.slug + '">Agregar</button>') +
-          '</div>' +
-        '</div>' +
-      '</article>';
-  }
-
+  /* ---- Productos destacados --------------------------------------------- */
   function pintarDestacados() {
     var cont = document.getElementById('destacados');
     if (!cont) return;
 
     Datos.productos({ destacados: true }).then(function (lista) {
-      cont.innerHTML = lista.map(tarjetaProducto).join('');
-
-      cont.querySelectorAll('[data-agregar]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          Datos.producto(btn.dataset.agregar).then(function (p) {
-            if (!p) return;
-            Carrito.agregar(p, p.variantes[0], 1);
-            var original = btn.textContent;
-            btn.textContent = 'Agregado';
-            btn.disabled = true;
-            setTimeout(function () { btn.textContent = original; btn.disabled = false; }, 1200);
-          });
-        });
-      });
+      cont.innerHTML = lista.map(UI.tarjeta).join('');
+      UI.conectar(cont, pintarDestacados);
     });
   }
 

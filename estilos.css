@@ -140,10 +140,16 @@ p { margin: 0 0 1em; }
 .boton[disabled] { opacity: .45; pointer-events: none; }
 
 /* ---------- 5. HEADER ---------------------------------------------------- */
-.header {
+/* El menú se pega arriba al hacer scroll. La posición va en el contenedor
+   (#header) y no en la etiqueta de adentro: si va adentro, el contenedor
+   mide solo 68px y el menú no tiene dónde quedarse pegado. */
+#header {
   position: sticky;
   top: 0;
   z-index: 50;
+}
+
+.header {
   background: rgba(255, 255, 255, .96);
   backdrop-filter: saturate(180%) blur(8px);
   border-bottom: 1px solid var(--escarcha);
@@ -524,3 +530,242 @@ p { margin: 0 0 1em; }
 
   .seccion { padding: 48px 0; }
 }
+
+/* ---------- 14. CABECERA DE SECCIÓN -------------------------------------- */
+.cabecera {
+  background: var(--hielo);
+  border-bottom: 1px solid var(--escarcha);
+  padding: 46px 0 34px;
+}
+.cabecera h1 { font-size: clamp(1.9rem, 4.5vw, 2.9rem); margin-bottom: .3em; }
+.cabecera__bajada { max-width: 62ch; color: var(--tinta-suave); margin-bottom: 24px; }
+
+/* ---------- 15. BUSCADOR ------------------------------------------------- */
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  padding: 0 14px;
+  background: var(--blanco);
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio-chico);
+  color: var(--tinta-suave);
+}
+.buscador:focus-within { border-color: var(--azul); }
+.buscador input {
+  flex: 1;
+  padding: 13px 0;
+  border: 0;
+  background: none;
+  font-family: var(--fuente);
+  font-size: 1rem;
+  color: var(--tinta);
+}
+.buscador input:focus { outline: none; }
+
+/* ---------- 16. FILTROS POR CATEGORÍA ------------------------------------ */
+.barra-filtros {
+  position: sticky;
+  top: 68px;
+  z-index: 40;
+  background: rgba(255,255,255,.97);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid var(--escarcha);
+}
+.chips {
+  display: flex;
+  gap: 8px;
+  padding: 12px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex: none;
+  padding: 8px 15px;
+  border: 1px solid var(--escarcha);
+  border-radius: 100px;
+  background: var(--blanco);
+  font-family: var(--fuente);
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--tinta);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+}
+.chip:hover { border-color: var(--azul); }
+.chip--activo { background: var(--azul); border-color: var(--azul); color: var(--blanco); }
+
+/* ---------- 17. ENCABEZADO DEL CATÁLOGO ---------------------------------- */
+.catalogo__encabezado {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+.catalogo__encabezado h2 { margin: 0; }
+.catalogo__cuenta { color: var(--tinta-suave); font-size: .95rem; font-weight: 600; }
+
+/* ---------- 18. CONTADOR DE CANTIDAD ------------------------------------- */
+.contador {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+  background: var(--blanco);
+}
+.contador__btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: var(--blanco);
+  color: var(--azul);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.contador__btn:hover { background: var(--azul-humo); }
+.contador__n {
+  min-width: 30px;
+  text-align: center;
+  font-weight: 800;
+  color: var(--tinta);
+  font-size: .98rem;
+}
+.contador--grande .contador__btn { width: 46px; height: 50px; font-size: 1.4rem; }
+.contador--grande .contador__n { min-width: 44px; font-size: 1.15rem; }
+
+/* ---------- 19. FICHA DE PRODUCTO ---------------------------------------- */
+.miga { font-size: .9rem; color: var(--tinta-suave); margin-bottom: 22px; display: flex; gap: 8px; }
+.miga a::after { content: ' ›'; color: var(--escarcha); }
+.miga a:last-child::after { content: ''; }
+
+.ficha { display: grid; grid-template-columns: 1fr 1.15fr; gap: 44px; align-items: start; }
+@media (max-width: 800px) { .ficha { grid-template-columns: 1fr; gap: 26px; } }
+
+.ficha__figura {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: var(--azul-humo);
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+.ficha__figura img { width: 100%; height: 100%; object-fit: cover; }
+.ficha__formato {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  font-weight: 800;
+  color: var(--azul);
+  letter-spacing: -.03em;
+  text-align: center;
+  padding: 0 18px;
+}
+@media (max-width: 800px) { .ficha__figura { aspect-ratio: 16/9; } }
+
+.ficha__datos h1 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); }
+.ficha__desc { color: var(--tinta-suave); }
+
+.ficha__precio { margin: 22px 0 26px; }
+.ficha__precio-num {
+  display: block;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--azul);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.ficha__precio-nota { display: block; font-size: .9rem; color: var(--tinta-suave); margin-top: 2px; }
+.ficha__precio-cc {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 11px;
+  border-radius: var(--radio-chico);
+  background: var(--hielo);
+  font-size: .88rem;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.presentaciones { margin-bottom: 24px; }
+.presentaciones__titulo { font-size: .95rem; font-weight: 700; color: var(--tinta); margin-bottom: 10px; }
+.presentacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 13px 16px;
+  border: 2px solid var(--escarcha);
+  border-radius: var(--radio-chico);
+  background: var(--blanco);
+  font-family: var(--fuente);
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.presentacion:hover { border-color: var(--azul-vivo); }
+.presentacion--activa { border-color: var(--azul); background: var(--azul-humo); }
+.presentacion__nombre { font-weight: 600; color: var(--tinta); }
+.presentacion__precio { font-weight: 800; color: var(--azul); font-variant-numeric: tabular-nums; }
+
+.comprar { display: flex; gap: 12px; align-items: stretch; }
+.comprar .boton { flex: 1; }
+.comprar .contador--grande { flex: none; }
+
+.ficha__yaesta { margin-top: 14px; font-size: .92rem; color: var(--tinta-suave); }
+
+.ficha__entrega {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--escarcha);
+  font-size: .93rem;
+  color: var(--tinta-suave);
+}
+.ficha__entrega p { margin: 0 0 6px; }
+.ficha__entrega strong { color: var(--tinta); }
+
+/* ---------- 20. IMAGEN DE PRODUCTO EN LA TARJETA ------------------------- */
+.producto__img { width: 100%; height: 100%; object-fit: cover; }
+
+@media (max-width: 900px) { .barra-filtros { top: 68px; } }
+@media (max-width: 560px) {
+  .producto__pie { align-items: center; }
+  .contador__btn { width: 32px; height: 32px; }
+}
+
+/* ---------- 21. SUCURSAL -------------------------------------------------- */
+.sucursal {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 0;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+@media (max-width: 820px) { .sucursal { grid-template-columns: 1fr; } }
+
+.sucursal__datos { padding: 34px; }
+.sucursal__datos h3 { font-size: 1.5rem; margin-bottom: 18px; }
+.sucursal__datos .dato { flex-direction: column; gap: 2px; margin-bottom: 14px; }
+.sucursal__datos .dato strong { font-size: .8rem; font-weight: 700; color: var(--tinta-suave); }
+.sucursal__datos .dato span { color: var(--tinta); }
+
+.sucursal__nota {
+  padding: 11px 14px;
+  border-radius: var(--radio-chico);
+  background: var(--hielo);
+  font-size: .92rem;
+  color: var(--tinta);
+}
+.sucursal__acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+
+.sucursal__mapa { width: 100%; min-height: 340px; border: 0; border-left: 1px solid var(--escarcha); }
+@media (max-width: 820px) { .sucursal__mapa { min-height: 260px; border-left: 0; border-top: 1px solid var(--escarcha); } }

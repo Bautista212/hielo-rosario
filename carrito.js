@@ -72,6 +72,17 @@
       return leer().reduce(function (t, i) { return t + i.precio * i.cantidad; }, 0);
     },
 
+    /* Cuántas unidades hay de un producto en una presentación */
+    cantidadDe: function (slug, presentacion) {
+      var i = leer().find(function (x) { return x.clave === slug + '|' + presentacion; });
+      return i ? i.cantidad : 0;
+    },
+
+    cantidadDeClave: function (clave) {
+      var i = leer().find(function (x) { return x.clave === clave; });
+      return i ? i.cantidad : 0;
+    },
+
     /* Cuánto saldría el mismo pedido con cuenta corriente */
     subtotalCuenta: function () {
       return leer().reduce(function (t, i) { return t + (i.precioCuenta || i.precio) * i.cantidad; }, 0);

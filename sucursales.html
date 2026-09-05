@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sucursales — Hielo Rosario</title>
-<meta name="description" content="Dónde retirar tu pedido en Rosario.">
+<title>Dónde estamos — Hielo Rosario</title>
+<meta name="description" content="Hielo Rosario está en Viamonte 3646, Rosario. Lunes a sábados de 7 a 20, domingos y feriados de 8:30 a 16.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -15,13 +15,22 @@
 <div id="header"></div>
 
 <main>
+  <section class="cabecera">
+    <div class="contenedor">
+      <div class="estado" id="estado" data-abierto="">
+        <span class="estado__punto"></span>
+        <span id="estadoTexto">Consultando horario</span>
+      </div>
+      <h1>Dónde estamos</h1>
+      <p class="cabecera__bajada">
+        Pasá a retirar tu pedido por el local. Si preferís, te lo llevamos a domicilio.
+      </p>
+    </div>
+  </section>
+
   <section class="seccion">
     <div class="contenedor">
-      <div class="aviso aviso--obra">
-        <h2>Sucursales</h2>
-        <p>Dónde retirar tu pedido en Rosario. Esta pantalla se arma en el próximo paso.</p>
-        <a class="boton boton--azul" href="index.html">Volver al inicio</a>
-      </div>
+      <div id="sucursales"><p class="cargando">Cargando…</p></div>
     </div>
   </section>
 </main>
@@ -32,5 +41,6 @@
 <script src="carrito.js"></script>
 <script src="datos.js"></script>
 <script src="layout.js"></script>
+<script src="sucursales.js"></script>
 </body>
 </html>

@@ -6,7 +6,12 @@
 
    CÓMO SE LEE CADA PRODUCTO
    -------------------------
-   ['slug', 'Nombre', 'categoria', 'formato', [ variantes ], 'descripción']
+   ['slug', 'Nombre', 'categoria', 'formato', [ variantes ], 'descripción', 'imagen']
+
+   La imagen es opcional. Cuando tengan fotos, pegá el link (o el nombre del
+   archivo si lo subís al repositorio) como último dato del producto:
+     ['quilmes-473', 'Quilmes 473 cc', ..., '', 'fotos/quilmes.jpg']
+   Mientras no haya foto se muestra el formato grande, que ya se lee bien.
 
    Y cada variante es:
    ['Nombre de la presentación', precioContado, precioCuentaCorriente]
@@ -246,6 +251,7 @@
       formato: p[3],
       variantes: variantes,
       descripcion: p[5] || '',
+      imagen: p[6] || '',
       desde: contados.length ? Math.min.apply(null, contados) : null,
       aConsultar: contados.length === 0,
       activo: true,
