@@ -399,6 +399,15 @@ p { margin: 0 0 1em; }
 .producto__nombre a { color: inherit; }
 .producto__desc { font-size: .88rem; color: var(--tinta-suave); margin: 0 0 14px; }
 
+/* Precio de cuenta corriente: presente pero claramente secundario, para que
+   se lea que lo barato es pagar en el momento. */
+.producto__cc {
+  margin: 0 0 12px;
+  font-size: .82rem;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
 .producto__pie { margin-top: auto; display: flex; align-items: center; gap: 10px; }
 .producto__precio {
   font-size: 1.3rem;
@@ -407,7 +416,10 @@ p { margin: 0 0 1em; }
   font-variant-numeric: tabular-nums;
   margin-right: auto;
 }
-.producto__precio small { display: block; font-size: .74rem; font-weight: 600; color: var(--tinta-suave); }
+.producto__precio small { display: block; font-size: .74rem; font-weight: 600; color: var(--tinta-suave); white-space: normal; }
+
+/* Cuando dice "Desde" el texto es más largo: se achica para no partirse */
+.producto__precio--desde { font-size: 1.1rem; white-space: nowrap; }
 
 .agotado { font-size: .85rem; font-weight: 700; color: var(--tinta-suave); }
 
