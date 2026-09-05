@@ -1500,3 +1500,30 @@ p { margin: 0 0 1em; }
   from { transform: translateY(-8px); opacity: .4; }
   to   { transform: none; opacity: 1; }
 }
+
+/* Estado de un flyer que todavía no se subió a GitHub */
+.flyer__pendiente {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 9px;
+  border-radius: 100px;
+  background: #FFF7E6;
+  border: 1px solid #E8CE95;
+  color: #7A5600;
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+.progreso--error { background: #FEF2F2; color: var(--rojo-oscuro); }
+
+.publicar__paso {
+  padding: 20px;
+  margin: 18px 0;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+}
+.publicar__paso h3 { font-size: 1.05rem; margin-bottom: 6px; }
+.publicar__paso p { color: var(--tinta-suave); font-size: .95rem; }
+.publicar__paso .boton { margin: 4px 8px 0 0; }
+.publicar__paso .publicar__nota { margin-top: 12px; }

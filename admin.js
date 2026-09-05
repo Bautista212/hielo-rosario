@@ -276,8 +276,8 @@
   /* ======================================================================
      PORTADA — banners, destacados y más vendidos
      ====================================================================== */
-  var ANCHO_MAXIMO = 1800;      /* a lo ancho, en píxeles */
-  var CALIDAD = 0.85;
+  var ANCHO_MAXIMO = 1600;      /* a lo ancho, en píxeles */
+  var CALIDAD = 0.8;
 
   /* ======================================================================
      PORTADA — flyers del carrusel, destacados y más vendidos
@@ -333,12 +333,13 @@
   function cajaFlyer(b, i) {
     return '' +
       '<div class="flyer' + (b.activo === false ? ' flyer--off' : '') + '">' +
-        '<img class="flyer__previa" src="' + b.imagen + '" alt="" ' +
+        '<img class="flyer__previa" src="' + (b.datos || b.imagen) + '" alt="" ' +
           'onerror="this.closest(\'.flyer\').classList.add(\'flyer--sinsubir\')">' +
-        '<div class="flyer__falta">Todavía no está subida a GitHub</div>' +
+        '<div class="flyer__falta">No se encuentra la imagen</div>' +
         '<div class="flyer__datos">' +
           '<strong class="flyer__nombre">' + (b.imagen || '').split('/').pop() + '</strong>' +
           (b.peso ? '<span class="flyer__peso">' + b.peso + '</span>' : '') +
+          (b.datos ? '<span class="flyer__pendiente">Sin publicar</span>' : '') +
           '<label class="flyer__link"><span>Al tocarlo, lleva a (opcional)</span>' +
             '<input type="text" data-link="' + i + '" value="' + (b.link || '').replace(/"/g, '&quot;') + '" ' +
               'placeholder="productos.html?c=hielo"></label>' +
@@ -392,23 +393,35 @@
         return cadena.then(function () {
           return optimizar(archivo).then(function (r) {
             var nombre = nombreLimpio(archivo.name) + '.jpg';
-            descargar(r.blob, nombre);
             port.banners.push({
               imagen: 'fotos/' + nombre,
+              datos: r.dataURL,          /* la imagen entera, guardada acá */
               peso: tamano(archivo.size) + ' → ' + tamano(r.blob.size) + ', ' + r.ancho + '×' + r.alto,
+              bytes: r.blob.size,
               link: '',
               activo: true,
+              publicada: false,
             });
             hechas++;
             barra.textContent = 'Listas ' + hechas + ' de ' + lista.length + '…';
-            /* Un respiro entre descargas: si van todas juntas, el navegador
-               bloquea las que siguen. */
-            return new Promise(function (ok) { setTimeout(ok, 400); });
           });
         });
       }, Promise.resolve()).then(function () {
-        guardar().then(function () { pintarPortada(true); });
+        return Datos.guardarPortada(port).then(function (ok) {
+          if (!ok) {
+            /* El navegador se quedó sin espacio para guardar imágenes */
+            port.banners = port.banners.slice(0, port.banners.length - lista.length);
+            Datos.guardarPortada(port);
+            barra.className = 'progreso progreso--error';
+            barra.textContent = 'No entran más imágenes en la memoria del navegador. ' +
+              'Publicá las que ya cargaste desde la pestaña Publicar y después seguí con estas.';
+            return;
+          }
+          pintarPestanas();
+          pintarPortada(true);
+        });
       }).catch(function () {
+        barra.className = 'progreso progreso--error';
         barra.textContent = 'Hubo un problema con alguna imagen. Probá con JPG o PNG.';
       });
     }
@@ -440,7 +453,10 @@
           lienzo.width = ancho; lienzo.height = alto;
           lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
           lienzo.toBlob(function (blob) {
-            resolve({ blob: blob, ancho: ancho, alto: alto });
+            resolve({
+              blob: blob, ancho: ancho, alto: alto,
+              dataURL: lienzo.toDataURL('image/jpeg', CALIDAD),
+            });
           }, 'image/jpeg', CALIDAD);
         };
         img.onerror = reject;
@@ -537,51 +553,97 @@
      ====================================================================== */
   function pintarPublicar() {
     var n = Datos.hayCambiosSinExportar();
-    var portadaTocada = Datos.hayPortadaModificada();
 
-    vista.innerHTML = '' +
-      '<div class="publicar">' +
-        '<h2>Publicar los cambios</h2>' +
-        ((n || portadaTocada)
-          ? '<p class="publicar__estado publicar__estado--pendiente">' +
-              [n ? n + (n === 1 ? ' producto modificado' : ' productos modificados') : '',
-               portadaTocada ? 'la portada modificada' : ''].filter(Boolean).join(' y ') +
-              '. Por ahora eso lo ves solo vos.</p>'
-          : '<p class="publicar__estado">No hay cambios pendientes. Todo lo que ves es lo que ven los clientes.</p>') +
+    Datos.portada().then(function (port) {
+      var pendientes = port.banners.filter(function (b) { return b.datos; });
+      var portadaTocada = Datos.hayPortadaModificada();
+      var pesoTotal = pendientes.reduce(function (t, b) { return t + (b.bytes || 0); }, 0);
 
-        '<ol class="publicar__pasos">' +
-          '<li>Tocá el botón y se te descarga el archivo <strong>datos.js</strong> con los precios nuevos.</li>' +
-          '<li>Entrá al repositorio en GitHub y subilo con <strong>Add file → Upload files</strong>. ' +
-              'Reemplaza al que está.</li>' +
-          '<li>En un minuto la página se actualiza sola para todo el mundo.</li>' +
-        '</ol>' +
+      vista.innerHTML = '' +
+        '<div class="publicar">' +
+          '<h2>Publicar los cambios</h2>' +
+          ((n || portadaTocada)
+            ? '<p class="publicar__estado publicar__estado--pendiente">' +
+                [n ? n + (n === 1 ? ' producto modificado' : ' productos modificados') : '',
+                 portadaTocada ? 'la portada modificada' : ''].filter(Boolean).join(' y ') +
+                '. Por ahora eso lo ves solo vos.</p>'
+            : '<p class="publicar__estado">No hay cambios pendientes. Todo lo que ves es lo que ven los clientes.</p>') +
 
-        '<button class="boton boton--principal" id="descargar"' + ((n || portadaTocada) ? '' : ' disabled') + '>' +
-          'Descargar datos.js</button>' +
-        ((n || portadaTocada) ? '<button class="boton boton--linea" id="descartar">Descartar mis cambios</button>' : '') +
+          (pendientes.length
+            ? '<div class="publicar__paso">' +
+                '<h3>1. Las imágenes de la portada</h3>' +
+                '<p>Tenés ' + pendientes.length + (pendientes.length === 1 ? ' flyer' : ' flyers') +
+                  ' cargado' + (pendientes.length === 1 ? '' : 's') + ' que todavía viven solo en esta ' +
+                  'computadora (' + tamano(pesoTotal) + ' en total). Descargalos y subilos a GitHub ' +
+                  'dentro de una carpeta llamada <strong>fotos</strong>.</p>' +
+                '<button class="boton boton--azul" id="bajarImagenes">' +
+                  'Descargar ' + (pendientes.length === 1 ? 'la imagen' : 'las ' + pendientes.length + ' imágenes') +
+                '</button>' +
+                '<button class="boton boton--linea" id="yaSubidas">Ya las subí a GitHub</button>' +
+                '<p class="publicar__nota">Cuando las hayas subido, tocá "Ya las subí": la página ' +
+                  'pasa a usar los archivos de GitHub y se libera la memoria del navegador.</p>' +
+              '</div>'
+            : '') +
 
-        '<p class="publicar__nota">Este paso existe porque todavía no conectamos la base de datos. ' +
-          'Cuando la conectemos, los precios se van a actualizar solos y esta pestaña desaparece.</p>' +
-      '</div>';
+          '<div class="publicar__paso">' +
+            '<h3>' + (pendientes.length ? '2. ' : '') + 'Los precios y el orden</h3>' +
+            '<p>Se te descarga el archivo <strong>datos.js</strong>. Subilo a GitHub con ' +
+              '<strong>Add file → Upload files</strong>: reemplaza al que está, y en un minuto ' +
+              'la página se actualiza para todo el mundo.</p>' +
+            '<button class="boton boton--principal" id="descargar"' +
+              ((n || portadaTocada) ? '' : ' disabled') + '>Descargar datos.js</button>' +
+            ((n || portadaTocada)
+              ? '<button class="boton boton--linea" id="descartar">Descartar mis cambios</button>'
+              : '') +
+          '</div>' +
 
-    var d = document.getElementById('descargar');
-    if (d) d.addEventListener('click', descargarArchivo);
+          '<p class="publicar__nota">Todo este paso existe porque todavía no conectamos la base de ' +
+            'datos. Cuando la conectemos, los cambios y las imágenes se publican solos.</p>' +
+        '</div>';
 
-    var x = document.getElementById('descartar');
-    if (x) x.addEventListener('click', function () {
-      if (confirm('¿Descartar todos los cambios y volver a los precios publicados?')) {
-        localStorage.removeItem('hr_portada');
-        Datos.descartarCambios().then(function () { location.reload(); });
-      }
+      var bi = document.getElementById('bajarImagenes');
+      if (bi) bi.addEventListener('click', function () { bajarImagenes(pendientes, bi); });
+
+      var ys = document.getElementById('yaSubidas');
+      if (ys) ys.addEventListener('click', function () {
+        if (!confirm('¿Ya subiste las imágenes a la carpeta "fotos" en GitHub?\n\n' +
+                     'Si todavía no lo hiciste, los flyers van a dejar de verse.')) return;
+        port.banners.forEach(function (b) { delete b.datos; delete b.bytes; });
+        Datos.guardarPortada(port).then(function () { pintarPestanas(); pintarPublicar(); });
+      });
+
+      var d = document.getElementById('descargar');
+      if (d) d.addEventListener('click', descargarArchivo);
+
+      var x = document.getElementById('descartar');
+      if (x) x.addEventListener('click', function () {
+        if (confirm('¿Descartar todos los cambios y volver a lo que está publicado?')) {
+          localStorage.removeItem('hr_portada');
+          Datos.descartarCambios().then(function () { location.reload(); });
+        }
+      });
     });
   }
 
-  function textoDeLinea(p) {
-    var vars = '[' + p.variantes.map(function (v) {
-      return '[' + txt(v[0]) + ',' + v[1] + ',' + v[2] + ']';
-    }).join(',') + ']';
-    return '  [' + [txt(p.slug), txt(p.nombre), txt(p.categoria), txt(p.formato),
-                    vars, txt(p.descripcion), txt(p.imagen)].join(', ') + '],';
+  /* Las descargas van de a una con una pausa: si salen todas juntas,
+     el navegador bloquea las que siguen. */
+  function bajarImagenes(pendientes, boton) {
+    var i = 0;
+    boton.disabled = true;
+    (function siguiente() {
+      if (i >= pendientes.length) {
+        boton.disabled = false;
+        boton.textContent = 'Descargadas';
+        return;
+      }
+      var b = pendientes[i];
+      boton.textContent = 'Descargando ' + (i + 1) + ' de ' + pendientes.length + '…';
+      fetch(b.datos).then(function (r) { return r.blob(); }).then(function (blob) {
+        descargar(blob, b.imagen.split('/').pop());
+        i++;
+        setTimeout(siguiente, 500);
+      });
+    })();
   }
 
   function txt(s) { return "'" + String(s == null ? '' : s).replace(/'/g, "\\'") + "'"; }

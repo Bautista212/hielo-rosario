@@ -32,7 +32,10 @@
       cont.innerHTML =
         '<div class="carrusel__pista" id="pista">' +
           lista.map(function (b) {
-            var img = '<img class="banner__foto" src="' + b.imagen + '" alt="" loading="lazy">';
+            /* b.datos es la imagen guardada en este navegador (todavía sin
+               publicar). Si no hay, se usa el archivo del repositorio. */
+            var fuente = b.datos || b.imagen;
+            var img = '<img class="banner__foto" src="' + fuente + '" alt="" loading="lazy">';
             return b.link
               ? '<a class="banner" href="' + b.link + '">' + img + '</a>'
               : '<div class="banner">' + img + '</div>';

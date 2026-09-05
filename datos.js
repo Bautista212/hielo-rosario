@@ -343,8 +343,15 @@
     },
 
     guardarPortada: function (datos) {
-      localStorage.setItem('hr_portada', JSON.stringify(datos));
-      return responder(true);
+      /* Las imágenes se guardan enteras dentro del navegador, así se ven
+         al instante sin tener que subirlas a ningún lado. El navegador
+         tiene un límite de espacio, así que puede fallar. */
+      try {
+        localStorage.setItem('hr_portada', JSON.stringify(datos));
+        return responder(true);
+      } catch (e) {
+        return responder(false);
+      }
     },
 
     hayPortadaModificada: function () {
