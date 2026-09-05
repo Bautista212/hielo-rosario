@@ -238,8 +238,15 @@
     return { slug: c[0], nombre: c[1], descripcion: c[2], orden: i + 1 };
   });
 
+  /* Cambios hechos desde el panel de administración. Viven en el navegador
+     hasta que se exporta el archivo y se sube a GitHub (o hasta que
+     conectemos Supabase, que es cuando esto deja de hacer falta). */
+  var CAMBIOS = {};
+  try { CAMBIOS = JSON.parse(localStorage.getItem('hr_cambios') || '{}'); } catch (e) {}
+
   var PRODUCTOS = LISTA.map(function (p, i) {
-    var variantes = p[4].map(function (v) {
+    var c = CAMBIOS[p[0]] || {};
+    var variantes = (c.variantes || p[4]).map(function (v) {
       return { nombre: v[0], contado: v[1], cuenta: v[2], hayDiferencia: v[2] > v[1] };
     });
     var contados = variantes.map(function (v) { return v.contado; }).filter(function (n) { return n > 0; });
@@ -248,13 +255,13 @@
       slug: p[0],
       nombre: p[1],
       categoria: p[2],
-      formato: p[3],
+      formato: c.formato !== undefined ? c.formato : p[3],
       variantes: variantes,
-      descripcion: p[5] || '',
-      imagen: p[6] || '',
+      descripcion: c.descripcion !== undefined ? c.descripcion : (p[5] || ''),
+      imagen: c.imagen !== undefined ? c.imagen : (p[6] || ''),
       desde: contados.length ? Math.min.apply(null, contados) : null,
       aConsultar: contados.length === 0,
-      activo: true,
+      activo: c.activo !== undefined ? c.activo : true,
     };
   });
 
@@ -352,6 +359,74 @@
     pedidos: function () {
       return responder(JSON.parse(localStorage.getItem('hr_pedidos') || '[]').reverse());
     },
+
+    actualizarPedido: function (codigo, cambios) {
+      var todos = JSON.parse(localStorage.getItem('hr_pedidos') || '[]');
+      var p = todos.find(function (x) { return x.codigo === codigo; });
+      if (p) Object.assign(p, cambios);
+      localStorage.setItem('hr_pedidos', JSON.stringify(todos));
+      return responder(p || null);
+    },
+
+    borrarPedido: function (codigo) {
+      var todos = JSON.parse(localStorage.getItem('hr_pedidos') || '[]')
+        .filter(function (x) { return x.codigo !== codigo; });
+      localStorage.setItem('hr_pedidos', JSON.stringify(todos));
+      return responder(true);
+    },
+
+    /* --- Usado solo por el panel de administración ----------------------- */
+    guardarProducto: function (slug, cambios) {
+      var todos = {};
+      try { todos = JSON.parse(localStorage.getItem('hr_cambios') || '{}'); } catch (e) {}
+      todos[slug] = Object.assign({}, todos[slug], cambios);
+      localStorage.setItem('hr_cambios', JSON.stringify(todos));
+      Object.assign(CAMBIOS, todos);
+
+      var p = PRODUCTOS.find(function (x) { return x.slug === slug; });
+      if (p) {
+        if (cambios.variantes) {
+          p.variantes = cambios.variantes.map(function (v) {
+            return { nombre: v[0], contado: v[1], cuenta: v[2], hayDiferencia: v[2] > v[1] };
+          });
+          var cs = p.variantes.map(function (v) { return v.contado; }).filter(function (n) { return n > 0; });
+          p.desde = cs.length ? Math.min.apply(null, cs) : null;
+          p.aConsultar = cs.length === 0;
+        }
+        ['formato', 'descripcion', 'imagen', 'activo'].forEach(function (k) {
+          if (cambios[k] !== undefined) p[k] = cambios[k];
+        });
+      }
+      return responder(true);
+    },
+
+    hayCambiosSinExportar: function () {
+      try { return Object.keys(JSON.parse(localStorage.getItem('hr_cambios') || '{}')).length; }
+      catch (e) { return 0; }
+    },
+
+    descartarCambios: function () {
+      localStorage.removeItem('hr_cambios');
+      return responder(true);
+    },
+
+    /* Devuelve todos los productos en el formato de línea del archivo,
+       para poder regenerar datos.js desde el panel. */
+    lineasDelArchivo: function () {
+      return responder(LISTA.map(function (p) {
+        var c = CAMBIOS[p[0]] || {};
+        return {
+          slug: p[0], nombre: p[1], categoria: p[2],
+          formato: c.formato !== undefined ? c.formato : p[3],
+          variantes: c.variantes || p[4],
+          descripcion: c.descripcion !== undefined ? c.descripcion : (p[5] || ''),
+          imagen: c.imagen !== undefined ? c.imagen : (p[6] || ''),
+          activo: c.activo !== undefined ? c.activo : true,
+        };
+      }));
+    },
+
+    todasLasCategorias: function () { return responder(CATS); },
 
   };
 

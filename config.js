@@ -45,6 +45,16 @@ window.CONFIG = {
     cuenta: 'Cuenta corriente',
   },
 
+  /* ---- PANEL INTERNO ----------------------------------------------------
+     Cambiá esta clave por la que quieran usar en Hielo Rosario.
+     AVISO: es una traba visual, no seguridad de verdad. Alguien que sepa
+     mirar el código de la página la puede ver. Sirve para que no entre
+     cualquiera de casualidad. La seguridad real llega con Supabase, cuando
+     cada empleado tenga usuario y contraseña propios.                      */
+  admin: {
+    clave: 'hielo2026',
+  },
+
   /* ---- SUPABASE — se completa al final ---------------------------------- */
   supabase: { url: '', anonKey: '' },
 
