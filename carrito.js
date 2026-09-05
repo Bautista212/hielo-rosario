@@ -22,40 +22,43 @@
 
     items: leer,
 
-    agregar: function (producto, cantidad) {
+    /* Cada línea del pedido es un producto EN UNA presentación concreta.
+       Coca 1.5L por unidad y Coca 1.5L pack x6 son dos líneas distintas. */
+    agregar: function (producto, variante, cantidad) {
       var items = leer();
       var cant = cantidad || 1;
-      var existente = items.find(function (i) { return i.id === producto.id; });
+      var clave = producto.slug + '|' + variante.nombre;
+      var existente = items.find(function (i) { return i.clave === clave; });
 
       if (existente) {
         existente.cantidad += cant;
       } else {
-        /* Se guarda una copia del nombre y del precio: si mañana cambia el
+        /* Se guarda copia del nombre y del precio: si mañana cambia el
            precio, el pedido ya hecho conserva el que el cliente vio. */
         items.push({
-          id: producto.id,
+          clave: clave,
           slug: producto.slug,
           nombre: producto.nombre,
-          precio: producto.precio,
-          unidad: producto.unidad,
-          kilos: producto.kilos || 0,
+          presentacion: variante.nombre,
+          precio: variante.contado,
+          precioCuenta: variante.cuenta,
           cantidad: cant,
         });
       }
       guardar(items);
     },
 
-    cambiarCantidad: function (id, cantidad) {
+    cambiarCantidad: function (clave, cantidad) {
       var items = leer();
-      var item = items.find(function (i) { return i.id === id; });
+      var item = items.find(function (i) { return i.clave === clave; });
       if (!item) return;
+      if (cantidad < 1) return window.Carrito.quitar(clave);
       item.cantidad = cantidad;
-      if (item.cantidad < 1) return window.Carrito.quitar(id);
       guardar(items);
     },
 
-    quitar: function (id) {
-      guardar(leer().filter(function (i) { return i.id !== id; }));
+    quitar: function (clave) {
+      guardar(leer().filter(function (i) { return i.clave !== clave; }));
     },
 
     vaciar: function () { guardar([]); },
@@ -69,8 +72,9 @@
       return leer().reduce(function (t, i) { return t + i.precio * i.cantidad; }, 0);
     },
 
-    kilosTotales: function () {
-      return leer().reduce(function (t, i) { return t + (i.kilos || 0) * i.cantidad; }, 0);
+    /* Cuánto saldría el mismo pedido con cuenta corriente */
+    subtotalCuenta: function () {
+      return leer().reduce(function (t, i) { return t + (i.precioCuenta || i.precio) * i.cantidad; }, 0);
     },
 
   };
