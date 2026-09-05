@@ -1422,3 +1422,15 @@ p { margin: 0 0 1em; }
 /* Si la foto todavía no está subida a GitHub, no se ve: se avisa */
 .foto-previa--falta { display: none; }
 .campo--foto .campo__ayuda { line-height: 1.5; }
+
+/* El cartel recién agregado se resalta un momento, si no queda perdido
+   al final de la lista y parece que el botón no hizo nada. */
+.banner-edit--nuevo {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 4px var(--azul-humo);
+  animation: aparece .5s ease;
+}
+@keyframes aparece {
+  from { transform: translateY(-8px); opacity: .4; }
+  to   { transform: none; opacity: 1; }
+}

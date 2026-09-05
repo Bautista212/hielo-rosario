@@ -282,7 +282,7 @@
     { id: 'hielo', nombre: 'Claro' },
   ];
 
-  function pintarPortada() {
+  function pintarPortada(resaltarUltimo) {
     Promise.all([Datos.portada(), Datos.productos({})]).then(function (r) {
       var port = r[0], todos = r[1];
 
@@ -290,10 +290,12 @@
 
       vista.innerHTML = '' +
         '<div class="admin__barra"><h2>Carteles de la portada</h2>' +
-          '<button class="boton boton--linea boton--chico" id="nuevoBanner">Agregar cartel</button>' +
+          '<button class="boton boton--principal boton--chico" id="nuevoBanner">Agregar otro cartel</button>' +
         '</div>' +
         '<p class="admin__ayuda">Se van deslizando solos arriba de todo. Sirven para promos, ' +
-          'novedades o avisos. Podés apagar uno sin borrarlo.</p>' +
+          'novedades o avisos. Podés apagar uno sin borrarlo, y ordenarlos con las flechitas. ' +
+          'Hay ' + port.banners.length + ' cartel' + (port.banners.length === 1 ? '' : 'es') + ' cargado' +
+          (port.banners.length === 1 ? '' : 's') + '.</p>' +
         '<div id="listaBanners">' + port.banners.map(cajaBanner).join('') + '</div>' +
 
         '<div class="admin__barra"><h2>Destacados</h2></div>' +
@@ -304,12 +306,25 @@
         '<p class="admin__ayuda">La segunda fila de productos de la portada.</p>' +
         selectorProductos('masVendidos', port.masVendidos, todos);
 
+      /* Si acabamos de agregar uno, hay que llevar a la persona hasta él:
+         si no, se agrega abajo de todo y parece que el botón no hizo nada. */
+      if (resaltarUltimo) {
+        var nuevo = vista.querySelector('.banner-edit:last-of-type');
+        if (nuevo) {
+          nuevo.classList.add('banner-edit--nuevo');
+          nuevo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          var titulo = nuevo.querySelector('[data-campo-banner="titulo"]');
+          if (titulo) setTimeout(function () { titulo.focus(); titulo.select(); }, 450);
+          setTimeout(function () { nuevo.classList.remove('banner-edit--nuevo'); }, 2200);
+        }
+      }
+
       /* --- Banners --- */
       document.getElementById('nuevoBanner').addEventListener('click', function () {
         port.banners.push({ etiqueta: '', titulo: 'Cartel nuevo', bajada: '', destacado: '',
                             boton: 'Ver productos', link: 'productos.html', imagen: '',
                             tono: 'azul', activo: true });
-        guardar().then(pintarPortada);
+        guardar().then(function () { pintarPortada(true); });
       });
 
       vista.querySelectorAll('[data-campo-banner]').forEach(function (el) {
