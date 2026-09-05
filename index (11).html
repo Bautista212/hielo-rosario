@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hielo Rosario — Venta y entrega de hielo en Rosario</title>
+<meta name="description" content="Hielo en bolsa, escamas, barras y hielo seco en Rosario. Retiralo por sucursal o pedí envío a domicilio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="contenedor">
+      <div class="hero__cuerpo">
+
+        <div class="estado" id="estado" data-abierto="">
+          <span class="estado__punto"></span>
+          <span id="estadoTexto">Consultando horario</span>
+        </div>
+
+        <h1>Hielo para hoy.</h1>
+        <p class="hero__bajada">
+          Retiralo por cualquiera de nuestras sucursales o pedilo a domicilio.
+          Entregamos en Rosario y alrededores todos los días.
+        </p>
+
+        <div class="hero__acciones">
+          <a class="boton boton--principal" href="productos.html">Ver productos</a>
+          <a class="boton boton--linea" href="eventos.html">¿Cuánto hielo necesito?</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CATEGORÍAS ============ -->
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Qué vendemos</h2>
+        <p>Desde la bolsa para el asado hasta el pedido diario de un bar.</p>
+      </div>
+      <div class="categorias" id="categorias">
+        <p class="cargando">Cargando productos…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CÓMO PEDIR (esto sí es una secuencia) ============ -->
+  <section class="seccion seccion--azul">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Cómo pedir</h2>
+        <p>Sin registrarte y sin pagar por adelantado. Abonás al recibir o al retirar.</p>
+      </div>
+      <div class="pasos">
+        <div class="paso">
+          <div class="paso__n num">Paso 1</div>
+          <h3>Armá tu pedido</h3>
+          <p>Elegí los productos y las cantidades que necesitás.</p>
+        </div>
+        <div class="paso">
+          <div class="paso__n num">Paso 2</div>
+          <h3>Elegí cómo lo recibís</h3>
+          <p>Retiro por sucursal, o envío a tu domicilio dentro de la zona de reparto.</p>
+        </div>
+        <div class="paso">
+          <div class="paso__n num">Paso 3</div>
+          <h3>Confirmá y esperá</h3>
+          <p>Te avisamos cuando el pedido sale. Pagás en efectivo o por transferencia.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DESTACADOS ============ -->
+  <section class="seccion seccion--fria">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Los más pedidos</h2>
+        <p>Lo que más sale, siempre en stock.</p>
+      </div>
+      <div class="grilla-productos" id="destacados">
+        <p class="cargando">Cargando productos…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ENTREGA ============ -->
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="duo">
+
+        <div class="panel">
+          <h3>Retiro por sucursal</h3>
+          <p>Preparamos el pedido y lo dejamos listo. Llegás, lo retirás y listo.</p>
+          <div id="resumenSucursales"></div>
+          <a class="boton boton--linea" href="sucursales.html">Ver sucursales</a>
+        </div>
+
+        <div class="panel">
+          <h3>Envío a domicilio</h3>
+          <p>Llegamos a Rosario y localidades vecinas. El costo depende de la zona.</p>
+          <div id="resumenZonas"></div>
+          <a class="boton boton--linea" href="zonas-de-envio.html">Ver zonas y costos</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="footer"></div>
+
+<script src="config.js"></script>
+<script src="carrito.js"></script>
+<script src="datos.js"></script>
+<script src="layout.js"></script>
+<script src="home.js"></script>
+</body>
+</html>

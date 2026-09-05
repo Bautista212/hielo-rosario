@@ -1,0 +1,514 @@
+/* ==========================================================================
+   HIELO ROSARIO — Estilos del sitio
+   Blanco = campo · Azul = estructura · Rojo = solo lo que se toca
+   ========================================================================== */
+
+/* ---------- 1. TOKENS ---------------------------------------------------- */
+:root {
+  /* Color */
+  --blanco:      #FFFFFF;
+  --hielo:       #F1F5FA;   /* fondo frío, reemplaza al gris neutro */
+  --escarcha:    #DDE7F2;   /* bordes y separadores */
+  --azul:        #0B3B77;   /* azul empresarial — estructura */
+  --azul-vivo:   #1668D6;   /* links e interacción */
+  --azul-humo:   #E7EFF9;   /* superficies azuladas suaves */
+  --rojo:        #D42A2A;   /* SOLO acciones y urgencia */
+  --rojo-oscuro: #A81F1F;
+  --tinta:       #0D1726;   /* texto principal (negro azulado, no gris) */
+  --tinta-suave: #5C6B80;   /* texto secundario */
+  --verde:       #15803D;   /* estado abierto */
+
+  /* Tipografía */
+  --fuente: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Espaciado */
+  --ancho: 1180px;
+  --gutter: 24px;
+  --radio: 10px;
+  --radio-chico: 6px;
+
+  /* Sombra: una sola, discreta, solo para elementos que flotan de verdad */
+  --sombra: 0 8px 28px rgba(11, 59, 119, .10);
+}
+
+/* ---------- 2. BASE ------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--tinta);
+  background: var(--blanco);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+a { color: var(--azul-vivo); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, h2, h3, h4 {
+  margin: 0 0 .5em;
+  line-height: 1.12;
+  letter-spacing: -.022em;
+  font-weight: 800;
+  color: var(--azul);
+}
+
+h1 { font-size: clamp(2.3rem, 6vw, 3.9rem); }
+h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); }
+h3 { font-size: 1.15rem; font-weight: 700; }
+
+p { margin: 0 0 1em; }
+
+/* Números: siempre alineados, porque acá el contenido son kilos y precios */
+.num { font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+
+/* Accesibilidad: foco visible siempre */
+:focus-visible {
+  outline: 3px solid var(--azul-vivo);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- 3. LAYOUT ---------------------------------------------------- */
+.contenedor {
+  width: 100%;
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.seccion { padding: 72px 0; }
+.seccion--fria { background: var(--hielo); }
+.seccion--azul { background: var(--azul); color: #E8F0FA; }
+.seccion--azul h2, .seccion--azul h3 { color: var(--blanco); }
+
+.seccion__intro { max-width: 62ch; margin-bottom: 40px; }
+.seccion__intro p { color: var(--tinta-suave); font-size: 1.05rem; margin: 0; }
+.seccion--azul .seccion__intro p { color: #B9CEE8; }
+
+.hidden { display: none !important; }
+
+/* ---------- 4. BOTONES --------------------------------------------------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border: 2px solid transparent;
+  border-radius: var(--radio-chico);
+  font-family: var(--fuente);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.boton:hover { text-decoration: none; }
+
+/* Rojo = la acción principal. Uno solo por pantalla. */
+.boton--principal { background: var(--rojo); color: var(--blanco); }
+.boton--principal:hover { background: var(--rojo-oscuro); }
+
+.boton--azul { background: var(--azul); color: var(--blanco); }
+.boton--azul:hover { background: #082B58; }
+
+.boton--linea { background: transparent; border-color: var(--escarcha); color: var(--azul); }
+.boton--linea:hover { border-color: var(--azul); background: var(--azul-humo); }
+
+.boton--claro { background: var(--blanco); color: var(--azul); }
+.boton--claro:hover { background: var(--hielo); }
+
+.boton--ancho { width: 100%; }
+.boton--chico { padding: 10px 18px; font-size: .92rem; }
+
+.boton[disabled] { opacity: .45; pointer-events: none; }
+
+/* ---------- 5. HEADER ---------------------------------------------------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid var(--escarcha);
+}
+
+.header__fila {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 68px;
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-weight: 800;
+  font-size: 1.22rem;
+  letter-spacing: -.03em;
+  color: var(--azul);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.logo:hover { text-decoration: none; }
+.logo span { color: var(--rojo); }
+
+.nav { display: flex; gap: 4px; margin-left: auto; }
+
+.nav a {
+  padding: 9px 13px;
+  border-radius: var(--radio-chico);
+  color: var(--tinta);
+  font-size: .95rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+.nav a:hover { background: var(--hielo); text-decoration: none; }
+.nav a.activo { color: var(--azul); font-weight: 700; background: var(--azul-humo); }
+
+/* Botón de pedido: el contador es la información, por eso va destacado */
+.pedido-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border-radius: var(--radio-chico);
+  background: var(--azul);
+  color: var(--blanco);
+  font-weight: 700;
+  font-size: .95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.pedido-btn:hover { background: #082B58; text-decoration: none; }
+
+.pedido-btn__cuenta {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--rojo);
+  color: var(--blanco);
+  font-size: .8rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pedido-btn__cuenta:empty,
+.pedido-btn__cuenta[data-vacio="si"] { display: none; }
+
+.menu-btn {
+  display: none;
+  margin-left: auto;
+  padding: 10px;
+  background: none;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio-chico);
+  cursor: pointer;
+  color: var(--azul);
+}
+
+@media (max-width: 900px) {
+  .menu-btn { display: inline-flex; }
+  .nav {
+    position: absolute;
+    top: 68px; left: 0; right: 0;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 8px var(--gutter) 16px;
+    background: var(--blanco);
+    border-bottom: 1px solid var(--escarcha);
+    box-shadow: var(--sombra);
+  }
+  .nav:not(.abierto) { display: none; }
+  .nav a { padding: 14px 8px; border-bottom: 1px solid var(--hielo); border-radius: 0; }
+  .header__fila { gap: 12px; }
+}
+
+/* ---------- 6. HERO ------------------------------------------------------ */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--hielo);
+  border-bottom: 1px solid var(--escarcha);
+}
+
+/* Textura de escarcha: cubos apenas insinuados. Es el único adorno del sitio. */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--escarcha) 1px, transparent 1px),
+    linear-gradient(90deg, var(--escarcha) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: .8;
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at 88% 15%, #000, transparent 72%);
+          mask-image: radial-gradient(ellipse 70% 90% at 88% 15%, #000, transparent 72%);
+  pointer-events: none;
+}
+
+.hero__cuerpo {
+  position: relative;
+  z-index: 1;
+  max-width: 54ch;
+  padding: 92px 0 84px;
+}
+
+.hero h1 { max-width: 11ch; margin-bottom: .28em; }
+.hero__bajada {
+  max-width: 46ch;
+  font-size: 1.14rem;
+  color: var(--tinta-suave);
+  margin-bottom: 30px;
+}
+
+.hero__acciones { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Estado de atención: dato útil de verdad, no decoración */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 22px;
+  padding: 7px 14px 7px 11px;
+  border-radius: 100px;
+  background: var(--blanco);
+  border: 1px solid var(--escarcha);
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--tinta);
+}
+.estado__punto {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--tinta-suave);
+  flex: none;
+}
+.estado[data-abierto="si"] .estado__punto { background: var(--verde); }
+.estado[data-abierto="no"] .estado__punto { background: var(--rojo); }
+
+@media (max-width: 700px) {
+  .hero__cuerpo { padding: 52px 0 48px; }
+  .hero::after { opacity: .35; }
+}
+
+/* ---------- 7. CATEGORÍAS ------------------------------------------------ */
+/* Sin sombras ni tarjetas iguales: el peso lo da el borde y el color de fondo */
+.categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  gap: 14px;
+}
+
+.categoria {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  min-height: 168px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  color: var(--tinta);
+  text-decoration: none;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.categoria:hover {
+  border-color: var(--azul);
+  background: var(--azul-humo);
+  text-decoration: none;
+}
+.categoria__nombre { font-size: 1.22rem; font-weight: 800; color: var(--azul); margin-bottom: 5px; }
+.categoria__desc { font-size: .93rem; color: var(--tinta-suave); margin: 0; }
+.categoria__desde {
+  margin-top: auto;
+  padding-top: 14px;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+/* ---------- 8. PRODUCTOS ------------------------------------------------- */
+.grilla-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+  gap: 16px;
+}
+
+.producto {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  overflow: hidden;
+}
+
+.producto__figura {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--azul-humo);
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--escarcha);
+}
+
+/* El kilaje como identificador visual del producto: en este rubro, es el dato */
+.producto__kilos {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--azul);
+  letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
+}
+.producto__kilos small { font-size: .95rem; font-weight: 600; margin-left: 2px; }
+
+.producto__etiqueta {
+  position: absolute;
+  top: 10px; left: 10px;
+  padding: 4px 9px;
+  border-radius: 4px;
+  background: var(--rojo);
+  color: var(--blanco);
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+
+.producto__cuerpo { padding: 16px; display: flex; flex-direction: column; flex: 1; }
+.producto__nombre { font-size: 1.02rem; font-weight: 700; color: var(--tinta); margin: 0 0 4px; }
+.producto__nombre a { color: inherit; }
+.producto__desc { font-size: .88rem; color: var(--tinta-suave); margin: 0 0 14px; }
+
+.producto__pie { margin-top: auto; display: flex; align-items: center; gap: 10px; }
+.producto__precio {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--azul);
+  font-variant-numeric: tabular-nums;
+  margin-right: auto;
+}
+.producto__precio small { display: block; font-size: .74rem; font-weight: 600; color: var(--tinta-suave); }
+
+.agotado { font-size: .85rem; font-weight: 700; color: var(--tinta-suave); }
+
+/* ---------- 9. PASOS (secuencia real, por eso van numerados) ------------- */
+.pasos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; }
+.paso { border-top: 3px solid rgba(255,255,255,.28); padding-top: 18px; }
+.paso__n {
+  font-size: .88rem; font-weight: 800; color: #7FB0EC;
+  font-variant-numeric: tabular-nums; margin-bottom: 8px;
+}
+.paso h3 { font-size: 1.13rem; margin-bottom: 6px; }
+.paso p { font-size: .95rem; color: #B9CEE8; margin: 0; }
+
+/* ---------- 10. BLOQUES SPLIT ------------------------------------------- */
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 780px) { .duo { grid-template-columns: 1fr; } }
+
+.panel {
+  padding: 32px;
+  border: 1px solid var(--escarcha);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  display: flex;
+  flex-direction: column;
+}
+.panel h3 { font-size: 1.4rem; margin-bottom: 8px; }
+.panel p { color: var(--tinta-suave); font-size: .98rem; }
+.panel .boton { margin-top: auto; align-self: flex-start; }
+
+.dato { display: flex; gap: 10px; align-items: baseline; margin-bottom: 6px; font-size: .95rem; }
+.dato strong { color: var(--azul); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- 11. FOOTER --------------------------------------------------- */
+.footer {
+  background: var(--azul);
+  color: #B9CEE8;
+  padding: 56px 0 26px;
+  font-size: .95rem;
+}
+.footer a { color: #DCE9F8; }
+.footer__grilla {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 34px;
+  padding-bottom: 34px;
+  border-bottom: 1px solid rgba(255,255,255,.16);
+}
+@media (max-width: 820px) { .footer__grilla { grid-template-columns: 1fr 1fr; gap: 26px; } }
+@media (max-width: 480px) { .footer__grilla { grid-template-columns: 1fr; } }
+
+.footer__logo { font-size: 1.3rem; font-weight: 800; color: var(--blanco); margin-bottom: 8px; letter-spacing: -.03em; }
+.footer__logo span { color: #FF8A8A; }
+.footer h4 { color: var(--blanco); font-size: .98rem; font-weight: 700; margin: 0 0 12px; }
+.footer ul { list-style: none; margin: 0; padding: 0; }
+.footer li { margin-bottom: 8px; }
+.footer__legal {
+  padding-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: .87rem;
+  color: #8FB2D8;
+}
+
+/* ---------- 12. AVISOS / ESTADOS VACÍOS --------------------------------- */
+.aviso {
+  padding: 18px 20px;
+  border-radius: var(--radio);
+  border: 1px solid var(--escarcha);
+  background: var(--hielo);
+  font-size: .95rem;
+}
+.aviso--obra { text-align: center; padding: 60px 20px; }
+.aviso--obra h2 { margin-bottom: 8px; }
+.aviso--obra p { color: var(--tinta-suave); max-width: 44ch; margin: 0 auto 22px; }
+
+.cargando { padding: 40px 0; color: var(--tinta-suave); font-size: .95rem; }
+
+/* ---------- 13. PRODUCTO EN CELULAR -------------------------------------
+   Tarjeta horizontal: el cliente ve 3 o 4 productos por pantalla en vez
+   de uno, que es lo que importa cuando está comprando desde el teléfono. */
+@media (max-width: 560px) {
+  .grilla-productos { grid-template-columns: 1fr; gap: 12px; }
+
+  .producto { flex-direction: row; align-items: stretch; }
+
+  .producto__figura {
+    aspect-ratio: auto;
+    width: 104px;
+    flex: none;
+    border-bottom: 0;
+    border-right: 1px solid var(--escarcha);
+  }
+  .producto__kilos { font-size: 1.75rem; }
+  .producto__etiqueta { top: 6px; left: 6px; font-size: .65rem; padding: 3px 6px; }
+
+  .producto__cuerpo { padding: 13px 14px; }
+  .producto__desc { display: none; }
+  .producto__pie { flex-wrap: wrap; gap: 8px; }
+  .producto__precio { font-size: 1.15rem; }
+
+  .seccion { padding: 48px 0; }
+}
