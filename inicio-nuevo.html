@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hielo Rosario — Hielo, bebidas y congelados en Rosario</title>
+<meta name="description" content="Hielo, bebidas, congelados, copetín y carbón en Rosario. Retiro en Viamonte 3646 sin mínimo de compra, o envío a domicilio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<main>
+
+  <!-- ============ BANNER DESLIZABLE ============ -->
+  <section class="banners">
+    <div class="contenedor">
+      <div class="carrusel" id="carrusel"><p class="cargando">Cargando…</p></div>
+    </div>
+  </section>
+
+  <!-- ============ BUSCADOR Y CATEGORÍAS ============ -->
+  <section class="seccion">
+    <div class="contenedor">
+
+      <div class="estado estado--centrado" id="estado" data-abierto="">
+        <span class="estado__punto"></span>
+        <span id="estadoTexto">Consultando horario</span>
+      </div>
+
+      <div class="buscar-inicio">
+        <div class="buscador">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="buscarInicio" type="search" placeholder="Buscá lo que necesitás" aria-label="Buscar un producto">
+          <a class="boton boton--principal" href="productos.html">Ver todo</a>
+        </div>
+        <div class="sugerencias" id="sugerencias"></div>
+      </div>
+
+      <div class="cats-toggle">
+        <button class="boton boton--linea" id="catsBoton" aria-expanded="false" aria-controls="catsPanel">
+          Ver todas las categorías
+        </button>
+      </div>
+      <div class="cats-panel" id="catsPanel" hidden></div>
+
+    </div>
+  </section>
+
+  <!-- ============ DESTACADOS ============ -->
+  <section class="seccion seccion--fria">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Destacados</h2>
+        <p>Lo que estamos recomendando esta semana.</p>
+      </div>
+      <div class="grilla-productos" id="destacados">
+        <p class="cargando">Cargando…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MÁS VENDIDOS ============ -->
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Los más vendidos</h2>
+        <p>Lo que más sale, siempre disponible.</p>
+      </div>
+      <div class="grilla-productos" id="masVendidos">
+        <p class="cargando">Cargando…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CÓMO PEDIR ============ -->
+  <section class="seccion seccion--azul">
+    <div class="contenedor">
+      <div class="seccion__intro">
+        <h2>Cómo pedir</h2>
+        <p>Sin registrarte y sin pagar por adelantado. Abonás al recibir o al retirar.</p>
+      </div>
+      <div class="pasos">
+        <div class="paso">
+          <div class="paso__n num">Paso 1</div>
+          <h3>Armá tu pedido</h3>
+          <p>Elegí los productos y las cantidades que necesitás.</p>
+        </div>
+        <div class="paso">
+          <div class="paso__n num">Paso 2</div>
+          <h3>Elegí cómo lo recibís</h3>
+          <p>Retiro en Viamonte 3646, o envío a tu domicilio.</p>
+        </div>
+        <div class="paso">
+          <div class="paso__n num">Paso 3</div>
+          <h3>Confirmá y esperá</h3>
+          <p>Te escribimos por WhatsApp para confirmarlo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ENTREGA ============ -->
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="duo">
+        <div class="panel">
+          <h3>Retiro en el local</h3>
+          <p>Preparamos el pedido y lo dejamos listo. Sin mínimo de compra.</p>
+          <div id="resumenSucursales"></div>
+          <a class="boton boton--linea" href="sucursales.html">Cómo llegar</a>
+        </div>
+        <div class="panel">
+          <h3>Envío a domicilio</h3>
+          <p>Llegamos a Rosario y localidades vecinas. El costo depende de la zona.</p>
+          <div id="resumenZonas"></div>
+          <a class="boton boton--linea" href="zonas-de-envio.html">Ver zonas y costos</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="footer"></div>
+
+<script src="config.js"></script>
+<script src="carrito.js"></script>
+<script src="datos.js"></script>
+<script src="layout.js"></script>
+<script src="home.js"></script>
+</body>
+</html>
