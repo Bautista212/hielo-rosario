@@ -282,30 +282,37 @@
   /* ======================================================================
      PORTADA — flyers del carrusel, destacados y más vendidos
      ====================================================================== */
+  var TONOS = [['azul','Azul'], ['rojo','Rojo'], ['claro','Claro']];
+
+  function esFoto(b) { return b.tipo === 'foto' || (!b.tipo && b.imagen); }
+
+  /* ======================================================================
+     PORTADA — carteles del carrusel, destacados y más vendidos
+     ====================================================================== */
   function pintarPortada(resaltarUltimo) {
     Promise.all([Datos.portada(), Datos.productos({})]).then(function (r) {
       var port = r[0], todos = r[1];
-
       function guardar() { return Datos.guardarPortada(port).then(pintarPestanas); }
 
       vista.innerHTML = '' +
-        '<div class="admin__barra"><h2>Flyers de la portada</h2></div>' +
-        '<p class="admin__ayuda">Son las imágenes que se van deslizando arriba de todo. ' +
-          'Se ven mejor apaisadas, más o menos <strong>1800 × 780 px</strong>. ' +
-          'Si son más grandes, las achicamos solas.</p>' +
+        '<div class="admin__barra"><h2>Carteles de la portada</h2>' +
+          '<button class="boton boton--linea boton--chico" id="nuevoDiseno">Escribir un cartel</button>' +
+        '</div>' +
+        '<p class="admin__ayuda">Se van deslizando arriba de todo. Hay dos formas de armarlos: ' +
+          'subiendo un <strong>flyer</strong> que hizo el diseñador, o <strong>escribiendo</strong> ' +
+          'uno acá, que se dibuja solo con los colores de la marca.</p>' +
 
         '<div class="soltar" id="soltar">' +
           '<input type="file" id="archivos" accept="image/*" multiple class="hidden">' +
-          '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg>' +
+          '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg>' +
           '<strong>Arrastrá los flyers acá</strong>' +
-          '<span>o tocá para elegirlos. Podés cargar varios de una vez.</span>' +
+          '<span>o tocá para elegirlos. Se ven mejor apaisados, 1600 × 700 px.</span>' +
         '</div>' +
         '<div id="progreso" class="progreso hidden"></div>' +
 
         (port.banners.length
-          ? '<div class="flyers">' + port.banners.map(cajaFlyer).join('') + '</div>'
-          : '<p class="admin__ayuda">Todavía no cargaste ninguno. Mientras tanto, en la portada ' +
-            'se muestra un cartel provisorio que va a desaparecer solo cuando cargues el primero.</p>') +
+          ? '<div class="flyers">' + port.banners.map(caja).join('') + '</div>'
+          : '<p class="admin__ayuda">No hay ninguno. Mientras tanto la portada muestra un cartel provisorio.</p>') +
 
         '<div class="admin__barra"><h2>Destacados</h2></div>' +
         '<p class="admin__ayuda">La primera fila de productos de la portada.</p>' +
@@ -315,49 +322,118 @@
         '<p class="admin__ayuda">La segunda fila de productos de la portada.</p>' +
         selectorProductos('masVendidos', port.masVendidos, todos);
 
+      document.getElementById('nuevoDiseno').addEventListener('click', function () {
+        port.banners.push({ tipo: 'diseno', tono: 'azul', etiqueta: '',
+          titulo: 'Escribí el título acá', bajada: '', boton: 'Ver productos',
+          link: 'productos.html', activo: true });
+        guardar().then(function () { pintarPortada(true); });
+      });
+
       conectarCarga(port, guardar);
-      conectarFlyers(port, guardar);
+      conectarLista(port, guardar);
       conectarFilas(port, guardar, todos);
 
       if (resaltarUltimo) {
-        var nuevo = vista.querySelector('.flyer:last-of-type');
-        if (nuevo) {
-          nuevo.classList.add('flyer--nuevo');
-          nuevo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(function () { nuevo.classList.remove('flyer--nuevo'); }, 2200);
+        var n = vista.querySelector('.flyer:last-of-type');
+        if (n) {
+          n.classList.add('flyer--nuevo');
+          n.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          var t = n.querySelector('[data-campo="titulo"]');
+          if (t) setTimeout(function () { t.focus(); t.select(); }, 450);
+          setTimeout(function () { n.classList.remove('flyer--nuevo'); }, 2200);
         }
       }
     });
   }
 
-  function cajaFlyer(b, i) {
-    return '' +
-      '<div class="flyer' + (b.activo === false ? ' flyer--off' : '') + '">' +
-        '<img class="flyer__previa" src="' + (b.datos || b.imagen) + '" alt="" ' +
-          'onerror="this.closest(\'.flyer\').classList.add(\'flyer--sinsubir\')">' +
-        '<div class="flyer__falta">No se encuentra la imagen</div>' +
+  /* Una tarjeta por cartel. Los de foto muestran la miniatura; los escritos,
+     una vista chica del cartel tal como se va a ver. */
+  function caja(b, i) {
+    var comun =
+      '<div class="flyer__acciones">' +
+        '<label class="tabla__check"><input type="checkbox" data-visible="' + i + '"' +
+          (b.activo !== false ? ' checked' : '') + '> Visible</label>' +
+        '<button class="chip" data-mover="-1" data-i="' + i + '" aria-label="Subir">↑</button>' +
+        '<button class="chip" data-mover="1" data-i="' + i + '" aria-label="Bajar">↓</button>' +
+        '<button class="chip chip--borrar" data-borrar="' + i + '">Borrar</button>' +
+      '</div>';
+
+    if (esFoto(b)) {
+      return '<div class="flyer' + (b.activo === false ? ' flyer--off' : '') + '">' +
+          '<img class="flyer__previa" src="' + (b.datos || b.imagen) + '" alt="" ' +
+            'onerror="this.closest(\'.flyer\').classList.add(\'flyer--sinsubir\')">' +
+          '<div class="flyer__falta">No se encuentra la imagen</div>' +
+          '<div class="flyer__datos">' +
+            '<strong class="flyer__nombre">' + (b.imagen || '').split('/').pop() + '</strong>' +
+            (b.peso ? '<span class="flyer__peso">' + b.peso + '</span>' : '') +
+            (b.datos ? '<span class="flyer__pendiente">Sin publicar</span>' : '') +
+            campo(i, 'link', 'Al tocarlo, lleva a (opcional)', b.link, 'productos.html?c=hielo') +
+          '</div>' + comun +
+        '</div>';
+    }
+
+    return '<div class="flyer' + (b.activo === false ? ' flyer--off' : '') + '">' +
+        '<div class="mini mini--' + (b.tono || 'azul') + '">' +
+          '<span class="mini__et">' + (b.etiqueta || '') + '</span>' +
+          '<strong class="mini__ti">' + (b.titulo || '') + '</strong>' +
+          '<span class="mini__bo">' + (b.boton || '') + '</span>' +
+        '</div>' +
         '<div class="flyer__datos">' +
-          '<strong class="flyer__nombre">' + (b.imagen || '').split('/').pop() + '</strong>' +
-          (b.peso ? '<span class="flyer__peso">' + b.peso + '</span>' : '') +
-          (b.datos ? '<span class="flyer__pendiente">Sin publicar</span>' : '') +
-          '<label class="flyer__link"><span>Al tocarlo, lleva a (opcional)</span>' +
-            '<input type="text" data-link="' + i + '" value="' + (b.link || '').replace(/"/g, '&quot;') + '" ' +
-              'placeholder="productos.html?c=hielo"></label>' +
-        '</div>' +
-        '<div class="flyer__acciones">' +
-          '<label class="tabla__check"><input type="checkbox" data-visible="' + i + '"' +
-            (b.activo !== false ? ' checked' : '') + '> Visible</label>' +
-          '<button class="chip" data-mover="-1" data-i="' + i + '" aria-label="Subir">↑</button>' +
-          '<button class="chip" data-mover="1" data-i="' + i + '" aria-label="Bajar">↓</button>' +
-          '<button class="chip chip--borrar" data-borrar-flyer="' + i + '">Borrar</button>' +
-        '</div>' +
+          '<div class="flyer__campos">' +
+            campo(i, 'etiqueta', 'Etiqueta chica', b.etiqueta, 'Promo de la semana') +
+            campo(i, 'titulo', 'Título', b.titulo, 'Hielo para hoy') +
+            campo(i, 'bajada', 'Texto', b.bajada, 'Una línea explicando la promo') +
+            campo(i, 'boton', 'Botón', b.boton, 'Ver productos') +
+            campo(i, 'link', 'Adónde lleva', b.link, 'productos.html?c=hielo') +
+            '<label class="campo"><span>Color</span><select data-campo="tono" data-i="' + i + '">' +
+              TONOS.map(function (t) {
+                return '<option value="' + t[0] + '"' + (b.tono === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
+              }).join('') +
+            '</select></label>' +
+          '</div>' +
+        '</div>' + comun +
       '</div>';
   }
 
-  /* ---- Cargar imágenes ---------------------------------------------------
-     GitHub Pages no puede recibir archivos. Lo que hacemos es achicar la
-     imagen acá mismo y descargarla con el nombre correcto; después se sube
-     al repositorio como cualquier otro archivo.                            */
+  function campo(i, nombre, rotulo, valor, ejemplo) {
+    return '<label class="campo"><span>' + rotulo + '</span>' +
+      '<input type="text" data-campo="' + nombre + '" data-i="' + i + '" ' +
+      'value="' + String(valor || '').replace(/"/g, '&quot;') + '" placeholder="' + ejemplo + '"></label>';
+  }
+
+  function conectarLista(port, guardar) {
+    vista.querySelectorAll('[data-campo]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        port.banners[Number(el.dataset.i)][el.dataset.campo] = el.value.trim();
+        guardar().then(function () { pintarPortada(); });
+      });
+    });
+    vista.querySelectorAll('[data-visible]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        port.banners[Number(el.dataset.visible)].activo = el.checked;
+        guardar().then(function () { pintarPortada(); });
+      });
+    });
+    vista.querySelectorAll('[data-mover]').forEach(function (bt) {
+      bt.addEventListener('click', function () {
+        var i = Number(bt.dataset.i), j = i + Number(bt.dataset.mover);
+        if (j < 0 || j >= port.banners.length) return;
+        var t = port.banners[i]; port.banners[i] = port.banners[j]; port.banners[j] = t;
+        guardar().then(function () { pintarPortada(); });
+      });
+    });
+    vista.querySelectorAll('[data-borrar]').forEach(function (bt) {
+      bt.addEventListener('click', function () {
+        if (!confirm('¿Sacar este cartel de la portada?')) return;
+        port.banners.splice(Number(bt.dataset.borrar), 1);
+        guardar().then(function () { pintarPortada(); });
+      });
+    });
+  }
+
+  /* ---- Cargar flyers -----------------------------------------------------
+     GitHub Pages no puede recibir archivos. La imagen se achica acá mismo y
+     se guarda en el navegador; al publicar se descarga para subirla.       */
   function conectarCarga(port, guardar) {
     var zona = document.getElementById('soltar');
     var input = document.getElementById('archivos');
@@ -365,42 +441,31 @@
 
     zona.addEventListener('click', function () { input.click(); });
     input.addEventListener('change', function () { procesar(input.files); });
-
-    ['dragenter', 'dragover'].forEach(function (e) {
-      zona.addEventListener(e, function (ev) {
-        ev.preventDefault(); zona.classList.add('soltar--activa');
-      });
+    ['dragenter','dragover'].forEach(function (e) {
+      zona.addEventListener(e, function (ev) { ev.preventDefault(); zona.classList.add('soltar--activa'); });
     });
-    ['dragleave', 'drop'].forEach(function (e) {
-      zona.addEventListener(e, function (ev) {
-        ev.preventDefault(); zona.classList.remove('soltar--activa');
-      });
+    ['dragleave','drop'].forEach(function (e) {
+      zona.addEventListener(e, function (ev) { ev.preventDefault(); zona.classList.remove('soltar--activa'); });
     });
-    zona.addEventListener('drop', function (ev) {
-      procesar(ev.dataTransfer.files);
-    });
+    zona.addEventListener('drop', function (ev) { procesar(ev.dataTransfer.files); });
 
     function procesar(archivos) {
       var lista = Array.prototype.slice.call(archivos)
         .filter(function (f) { return f.type.indexOf('image/') === 0; });
       if (!lista.length) return;
 
-      barra.classList.remove('hidden');
+      barra.className = 'progreso';
       barra.textContent = 'Preparando ' + lista.length + (lista.length === 1 ? ' imagen…' : ' imágenes…');
-
       var hechas = 0;
+
       lista.reduce(function (cadena, archivo) {
         return cadena.then(function () {
           return optimizar(archivo).then(function (r) {
             var nombre = nombreLimpio(archivo.name) + '.jpg';
             port.banners.push({
-              imagen: 'fotos/' + nombre,
-              datos: r.dataURL,          /* la imagen entera, guardada acá */
+              tipo: 'foto', imagen: 'fotos/' + nombre, datos: r.dataURL,
               peso: tamano(archivo.size) + ' → ' + tamano(r.blob.size) + ', ' + r.ancho + '×' + r.alto,
-              bytes: r.blob.size,
-              link: '',
-              activo: true,
-              publicada: false,
+              bytes: r.blob.size, link: '', activo: true,
             });
             hechas++;
             barra.textContent = 'Listas ' + hechas + ' de ' + lista.length + '…';
@@ -409,16 +474,14 @@
       }, Promise.resolve()).then(function () {
         return Datos.guardarPortada(port).then(function (ok) {
           if (!ok) {
-            /* El navegador se quedó sin espacio para guardar imágenes */
             port.banners = port.banners.slice(0, port.banners.length - lista.length);
             Datos.guardarPortada(port);
             barra.className = 'progreso progreso--error';
             barra.textContent = 'No entran más imágenes en la memoria del navegador. ' +
-              'Publicá las que ya cargaste desde la pestaña Publicar y después seguí con estas.';
+              'Publicá las que ya cargaste y después seguí con estas.';
             return;
           }
-          pintarPestanas();
-          pintarPortada(true);
+          pintarPestanas(); pintarPortada(true);
         });
       }).catch(function () {
         barra.className = 'progreso progreso--error';
@@ -430,15 +493,12 @@
   function descargar(blob, nombre) {
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = nombre;
-    a.click();
+    a.download = nombre; a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   }
 
   function tamano(bytes) {
-    return bytes > 1024 * 1024
-      ? (bytes / 1024 / 1024).toFixed(1) + ' MB'
-      : Math.round(bytes / 1024) + ' KB';
+    return bytes > 1048576 ? (bytes/1048576).toFixed(1) + ' MB' : Math.round(bytes/1024) + ' KB';
   }
 
   function optimizar(archivo) {
@@ -449,14 +509,11 @@
         img.onload = function () {
           var ancho = Math.min(img.width, ANCHO_MAXIMO);
           var alto = Math.round(img.height * (ancho / img.width));
-          var lienzo = document.createElement('canvas');
-          lienzo.width = ancho; lienzo.height = alto;
-          lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
-          lienzo.toBlob(function (blob) {
-            resolve({
-              blob: blob, ancho: ancho, alto: alto,
-              dataURL: lienzo.toDataURL('image/jpeg', CALIDAD),
-            });
+          var l = document.createElement('canvas');
+          l.width = ancho; l.height = alto;
+          l.getContext('2d').drawImage(img, 0, 0, ancho, alto);
+          l.toBlob(function (blob) {
+            resolve({ blob: blob, ancho: ancho, alto: alto, dataURL: l.toDataURL('image/jpeg', CALIDAD) });
           }, 'image/jpeg', CALIDAD);
         };
         img.onerror = reject;
@@ -468,42 +525,9 @@
   }
 
   function nombreLimpio(nombre) {
-    return nombre.replace(/\.[^.]+$/, '')
-      .toLowerCase()
+    return nombre.replace(/\.[^.]+$/, '').toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, 40) || 'flyer';
-  }
-
-  function conectarFlyers(port, guardar) {
-    vista.querySelectorAll('[data-link]').forEach(function (el) {
-      el.addEventListener('change', function () {
-        port.banners[Number(el.dataset.link)].link = el.value.trim();
-        guardar();
-      });
-    });
-    vista.querySelectorAll('[data-visible]').forEach(function (el) {
-      el.addEventListener('change', function () {
-        port.banners[Number(el.dataset.visible)].activo = el.checked;
-        guardar().then(function () { pintarPortada(); });
-      });
-    });
-    vista.querySelectorAll('[data-mover]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var i = Number(b.dataset.i), j = i + Number(b.dataset.mover);
-        if (j < 0 || j >= port.banners.length) return;
-        var t = port.banners[i]; port.banners[i] = port.banners[j]; port.banners[j] = t;
-        guardar().then(function () { pintarPortada(); });
-      });
-    });
-    vista.querySelectorAll('[data-borrar-flyer]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        if (!confirm('¿Sacar este flyer de la portada?')) return;
-        port.banners.splice(Number(b.dataset.borrarFlyer), 1);
-        guardar().then(function () { pintarPortada(); });
-      });
-    });
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'flyer';
   }
 
   function conectarFilas(port, guardar, todos) {
@@ -556,6 +580,7 @@
 
     Datos.portada().then(function (port) {
       var pendientes = port.banners.filter(function (b) { return b.datos; });
+      /* Los carteles escritos no necesitan subir nada: viajan dentro de datos.js */
       var portadaTocada = Datos.hayPortadaModificada();
       var pesoTotal = pendientes.reduce(function (t, b) { return t + (b.bytes || 0); }, 0);
 
@@ -648,12 +673,27 @@
 
   function txt(s) { return "'" + String(s == null ? '' : s).replace(/'/g, "\\'") + "'"; }
 
+  /* Un producto, en el formato de línea que usa el archivo */
+  function textoDeLinea(p) {
+    var vars = '[' + p.variantes.map(function (v) {
+      return '[' + txt(v[0]) + ',' + v[1] + ',' + v[2] + ']';
+    }).join(',') + ']';
+    return '  [' + [txt(p.slug), txt(p.nombre), txt(p.categoria), txt(p.formato),
+                    vars, txt(p.descripcion), txt(p.imagen)].join(', ') + '],';
+  }
+
   function bloquePortada(port) {
     return '' +
       '  var BANNERS = [\n' +
       port.banners.map(function (b) {
-        return '    { imagen: ' + txt(b.imagen) + ', link: ' + txt(b.link) +
-               ', activo: ' + (b.activo !== false) + ' },';
+        if (b.tipo === 'foto' || (!b.tipo && b.imagen)) {
+          return "    { tipo: 'foto', imagen: " + txt(b.imagen) + ', link: ' + txt(b.link) +
+                 ', activo: ' + (b.activo !== false) + ' },';
+        }
+        return "    { tipo: 'diseno', tono: " + txt(b.tono || 'azul') +
+               ', etiqueta: ' + txt(b.etiqueta) + ', titulo: ' + txt(b.titulo) +
+               ', bajada: ' + txt(b.bajada) + ', boton: ' + txt(b.boton) +
+               ', link: ' + txt(b.link) + ', activo: ' + (b.activo !== false) + ' },';
       }).join('\n') +
       '\n  ];\n\n' +
       '  var DESTACADOS = [' + port.destacados.map(txt).join(', ') + '];\n\n' +
@@ -662,8 +702,11 @@
 
   function reemplazar(texto, marcaIni, marcaFin, contenido) {
     var a = texto.indexOf(marcaIni);
-    var b = texto.indexOf(marcaFin);
-    if (a === -1 || b === -1) return null;
+    if (a === -1) return null;
+    /* El cierre se busca DESPUÉS de la apertura: si no, un cierre parecido
+       que esté más arriba en el archivo rompe todo el reemplazo. */
+    var b = texto.indexOf(marcaFin, a + marcaIni.length);
+    if (b === -1) return null;
     return texto.slice(0, a) + marcaIni + '\n' + contenido + '  ' + texto.slice(b);
   }
 

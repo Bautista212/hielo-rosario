@@ -231,10 +231,34 @@
      Si preferís tocarlo a mano, también se puede.                          */
 
 
-  /* Los flyers que se van deslizando arriba de todo.
-     Son solo imágenes: el diseño va adentro de la foto.
-     Se cargan desde el panel interno, en la pestaña "Portada".            */
+  /* Los carteles que se van deslizando arriba de todo.
+     Hay de dos tipos y se pueden mezclar:
+
+       tipo 'diseno' — se dibuja en la página con código. No hay que subir
+       ningún archivo, pesa casi nada y se ve nítido en cualquier pantalla.
+
+       tipo 'foto'   — una imagen que hizo el diseñador. Se carga desde el
+       panel interno, en la pestaña "Portada".
+
+     Todo esto se edita desde el panel.                                     */
   var BANNERS = [
+    { tipo: 'diseno', tono: 'azul',
+      etiqueta: 'Retiro en el local',
+      titulo: 'Hielo para hoy.',
+      bajada: 'Pasá por Viamonte 3646 y llevate lo que necesites. Sin mínimo de compra.',
+      boton: 'Ver productos', link: 'productos.html?c=hielo', activo: true },
+
+    { tipo: 'diseno', tono: 'rojo',
+      etiqueta: 'Envío a domicilio',
+      titulo: 'Te lo llevamos a tu casa.',
+      bajada: 'Rosario y alrededores. Sin mínimo si el pedido lleva hielo.',
+      boton: 'Ver zonas y costos', link: 'zonas-de-envio.html', activo: true },
+
+    { tipo: 'diseno', tono: 'claro',
+      etiqueta: 'Efectivo, transferencia o débito',
+      titulo: 'Pagando en el momento te sale menos.',
+      bajada: 'La diferencia con cuenta corriente la ves en cada producto.',
+      boton: 'Ver el catálogo', link: 'productos.html', activo: true },
   ];
 
   /* Los que aparecen en "Destacados" y en "Los más vendidos".

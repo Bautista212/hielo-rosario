@@ -8,22 +8,43 @@
   /* ======================================================================
      BANNER DESLIZABLE
      ====================================================================== */
+  /* Los cubos de hielo del fondo. Van en SVG: se ven nítidos en cualquier
+     pantalla y pesan unos pocos caracteres. */
+  function cubos() {
+    function cubo(x, y, a, op) {
+      var h = a * 0.55, alto = a * 0.82;
+      return '<g opacity="' + op + '">' +
+        '<path d="M' + (x-a) + ' ' + y + ' L' + x + ' ' + (y+h) + ' L' + x + ' ' + (y+h+alto) +
+              ' L' + (x-a) + ' ' + (y+alto) + 'Z" fill="rgba(255,255,255,.14)"/>' +
+        '<path d="M' + x + ' ' + (y+h) + ' L' + (x+a) + ' ' + y + ' L' + (x+a) + ' ' + (y+alto) +
+              ' L' + x + ' ' + (y+h+alto) + 'Z" fill="rgba(255,255,255,.07)"/>' +
+        '<path d="M' + x + ' ' + (y-h) + ' L' + (x+a) + ' ' + y + ' L' + x + ' ' + (y+h) +
+              ' L' + (x-a) + ' ' + y + 'Z" fill="rgba(255,255,255,.2)"/>' +
+        '<path d="M' + (x-a) + ' ' + y + ' L' + x + ' ' + (y-h) + ' L' + (x+a) + ' ' + y +
+              ' L' + x + ' ' + (y+h) + ' Z M' + (x-a) + ' ' + y + ' L' + (x-a) + ' ' + (y+alto) +
+              ' L' + x + ' ' + (y+h+alto) + ' L' + (x+a) + ' ' + (y+alto) + ' L' + (x+a) + ' ' + y +
+              ' M' + x + ' ' + (y+h) + ' L' + x + ' ' + (y+h+alto) + '" ' +
+              'fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '</g>';
+    }
+    return '<svg class="banner__cubos" viewBox="0 0 560 700" aria-hidden="true">' +
+      cubo(200, 250, 118, .95) + cubo(390, 415, 92, .8) + cubo(105, 470, 78, .65) +
+    '</svg>';
+  }
+
   function pintarBanners() {
     var cont = document.getElementById('carrusel');
     if (!cont) return;
 
     Datos.banners().then(function (lista) {
-      /* Mientras no haya flyers cargados se muestra un cartel provisorio,
-         para que la portada no arranque vacía. Desaparece solo cuando
-         cargan el primero desde el panel. */
       if (!lista.length) {
         cont.innerHTML =
-          '<div class="banner banner--provisorio">' +
+          '<div class="banner banner--azul">' + cubos() +
             '<div class="banner__cuerpo">' +
               '<h2 class="banner__titulo">Hielo, bebidas y congelados</h2>' +
               '<p class="banner__bajada">Retiro en Viamonte 3646 sin mínimo de compra, ' +
                 'o envío a domicilio en Rosario.</p>' +
-              '<a class="banner__boton" href="productos.html">Ver el catálogo</a>' +
+              '<span class="banner__boton">Ver el catálogo</span>' +
             '</div>' +
           '</div>';
         return;
@@ -31,15 +52,7 @@
 
       cont.innerHTML =
         '<div class="carrusel__pista" id="pista">' +
-          lista.map(function (b) {
-            /* b.datos es la imagen guardada en este navegador (todavía sin
-               publicar). Si no hay, se usa el archivo del repositorio. */
-            var fuente = b.datos || b.imagen;
-            var img = '<img class="banner__foto" src="' + fuente + '" alt="" loading="lazy">';
-            return b.link
-              ? '<a class="banner" href="' + b.link + '">' + img + '</a>'
-              : '<div class="banner">' + img + '</div>';
-          }).join('') +
+          lista.map(dibujarBanner).join('') +
         '</div>' +
         (lista.length > 1
           ? '<button class="carrusel__flecha carrusel__flecha--izq" id="izq" aria-label="Anterior">' +
@@ -49,13 +62,38 @@
             '<div class="carrusel__puntos" id="puntos">' +
               lista.map(function (_, i) {
                 return '<button class="carrusel__punto' + (i === 0 ? ' carrusel__punto--activo' : '') +
-                       '" data-i="' + i + '" aria-label="Ver flyer ' + (i + 1) + '"></button>';
+                       '" data-i="' + i + '" aria-label="Ver cartel ' + (i + 1) + '"></button>';
               }).join('') +
             '</div>'
           : '');
 
       if (lista.length > 1) conectarCarrusel(lista.length);
     });
+  }
+
+  function dibujarBanner(b) {
+    var envuelve = function (clases, dentro) {
+      return b.link
+        ? '<a class="banner ' + clases + '" href="' + b.link + '">' + dentro + '</a>'
+        : '<div class="banner ' + clases + '">' + dentro + '</div>';
+    };
+
+    /* Cartel hecho con una foto del diseñador */
+    if (b.tipo === 'foto' || (!b.tipo && b.imagen)) {
+      var fuente = b.datos || b.imagen;   /* b.datos = todavía sin publicar */
+      return envuelve('banner--foto',
+        '<img class="banner__foto" src="' + fuente + '" alt="" loading="lazy">');
+    }
+
+    /* Cartel dibujado en la página */
+    return envuelve('banner--' + (b.tono || 'azul'),
+      cubos() +
+      '<div class="banner__cuerpo">' +
+        (b.etiqueta ? '<span class="banner__etiqueta">' + b.etiqueta + '</span>' : '') +
+        '<h2 class="banner__titulo">' + (b.titulo || '') + '</h2>' +
+        (b.bajada ? '<p class="banner__bajada">' + b.bajada + '</p>' : '') +
+        (b.boton ? '<span class="banner__boton">' + b.boton + '</span>' : '') +
+      '</div>');
   }
 
   function conectarCarrusel(total) {

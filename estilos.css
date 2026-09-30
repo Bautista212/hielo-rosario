@@ -1166,101 +1166,112 @@ p { margin: 0 0 1em; }
   position: relative;
   flex: 0 0 100%;
   scroll-snap-align: center;
-  aspect-ratio: 1800 / 780;
-  display: block;
-  padding: 0;
-  border-radius: var(--radio);
+  aspect-ratio: 1600 / 700;
+  display: flex;
+  align-items: center;
   overflow: hidden;
+  border-radius: var(--radio);
   color: var(--blanco);
   text-decoration: none;
   background: var(--azul);
 }
 .banner:hover { text-decoration: none; }
 
-.banner--provisorio {
-  aspect-ratio: auto;
-  min-height: 380px;
-  display: flex;
-  align-items: flex-end;
-  padding: 100px 40px 40px;
-}
-@media (max-width: 700px) {
-  .banner--provisorio { min-height: 340px; padding: 96px 24px 26px; }
+/* --- Los tres tonos --- */
+.banner--azul  { background: linear-gradient(105deg, #0B3B77 0%, #072650 100%); }
+.banner--rojo  { background: linear-gradient(105deg, #D42A2A 0%, #A01C1C 100%); }
+.banner--claro {
+  background: linear-gradient(105deg, var(--hielo) 0%, #E4ECF6 100%);
+  color: var(--tinta);
 }
 
-.banner--rojo  { background: var(--rojo); }
-.banner--hielo { background: var(--hielo); color: var(--tinta); }
-.banner--hielo .banner__etiqueta { background: var(--rojo); color: var(--blanco); }
-.banner--hielo .banner__titulo   { color: var(--azul); }
-.banner--hielo .banner__bajada   { color: var(--tinta-suave); }
-
-/* Textura de escarcha, igual que en el hero */
-.banner--provisorio::before {
+/* Trama de escarcha, desvanecida hacia la izquierda para no tapar el texto */
+.banner::before {
   content: '';
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,.16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.16) 1px, transparent 1px);
-  background-size: 46px 46px;
-  -webkit-mask-image: radial-gradient(ellipse 60% 90% at 85% 12%, #000, transparent 70%);
-          mask-image: radial-gradient(ellipse 60% 90% at 85% 12%, #000, transparent 70%);
+    linear-gradient(rgba(255,255,255,.17) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.17) 1px, transparent 1px);
+  background-size: 52px 52px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 30%, #000 72%);
+          mask-image: linear-gradient(90deg, transparent 30%, #000 72%);
   pointer-events: none;
 }
-.banner--provisorio.banner--hielo::before {
+.banner--claro::before {
   background-image:
     linear-gradient(var(--escarcha) 1px, transparent 1px),
     linear-gradient(90deg, var(--escarcha) 1px, transparent 1px);
 }
 
-.banner__foto {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
+/* Los cubos de hielo del fondo */
+.banner__cubos {
+  position: absolute;
+  top: 0; right: 2%;
+  height: 100%;
+  width: auto;
+  pointer-events: none;
 }
-.banner__velo {
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(11,59,119,.92) 0%, rgba(11,59,119,.55) 55%, transparent 100%);
+.banner--claro .banner__cubos path[fill^="rgba(255,255,255"] { fill: rgba(255,255,255,.95); }
+.banner--claro .banner__cubos path[stroke] { stroke: var(--escarcha); }
+
+/* --- Contenido --- */
+.banner__cuerpo {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  padding: 0 clamp(24px, 4vw, 62px);
 }
 
-.banner__cuerpo { position: relative; z-index: 1; max-width: 34rem; }
 .banner__etiqueta {
   display: inline-block;
-  margin-bottom: 12px;
-  padding: 5px 12px;
+  margin-bottom: 16px;
+  padding: 8px 18px;
   border-radius: 100px;
-  background: rgba(255,255,255,.2);
-  font-size: .82rem;
-  font-weight: 700;
+  background: rgba(255,255,255,.22);
+  font-size: clamp(.74rem, 1.1vw, .9rem);
+  font-weight: 600;
+  letter-spacing: .01em;
 }
+.banner--claro .banner__etiqueta { background: var(--rojo); color: var(--blanco); }
+
 .banner__titulo {
-  font-size: clamp(1.7rem, 4vw, 2.7rem);
+  font-size: clamp(1.5rem, 4.3vw, 3.4rem);
   font-weight: 800;
-  letter-spacing: -.03em;
-  line-height: 1.08;
-  margin: 0 0 10px;
+  letter-spacing: -.035em;
+  line-height: 1.04;
+  margin: 0 0 14px;
   color: inherit;
 }
-.banner__destacado {
-  display: block;
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 800;
-  letter-spacing: -.04em;
-  margin-bottom: 8px;
-  font-variant-numeric: tabular-nums;
+.banner--claro .banner__titulo { color: var(--azul); }
+
+.banner__bajada {
+  font-size: clamp(.86rem, 1.5vw, 1.14rem);
+  line-height: 1.45;
+  margin: 0 0 24px;
+  opacity: .9;
 }
-.banner__bajada { font-size: 1.02rem; margin-bottom: 20px; opacity: .92; }
+.banner--claro .banner__bajada { color: var(--tinta-suave); opacity: 1; }
+
 .banner__boton {
-  display: inline-flex; align-items: center;
-  padding: 12px 22px;
+  display: inline-flex;
+  align-items: center;
+  padding: clamp(10px, 1.4vw, 15px) clamp(18px, 2.4vw, 30px);
   border-radius: var(--radio-chico);
   background: var(--blanco);
   color: var(--azul);
   font-weight: 700;
-  font-size: .96rem;
+  font-size: clamp(.85rem, 1.3vw, 1rem);
+  white-space: nowrap;
 }
-.banner--hielo .banner__boton { background: var(--rojo); color: var(--blanco); }
+.banner--rojo  .banner__boton { color: #A01C1C; }
+.banner--claro .banner__boton { background: var(--rojo); color: var(--blanco); }
 
-/* Puntitos y flechas */
+/* --- Cartel hecho con una foto --- */
+.banner--foto { background: var(--hielo); }
+.banner--foto::before { display: none; }
+.banner__foto { width: 100%; height: 100%; object-fit: cover; }
+
+/* --- Puntitos y flechas --- */
 .carrusel__puntos { display: flex; justify-content: center; gap: 7px; margin-top: 16px; }
 .carrusel__punto {
   width: 8px; height: 8px; padding: 0;
@@ -1273,7 +1284,7 @@ p { margin: 0 0 1em; }
 
 .carrusel__flecha {
   position: absolute;
-  bottom: 26px;
+  bottom: 24px;
   width: 42px; height: 42px;
   display: grid; place-items: center;
   border: 1px solid rgba(255,255,255,.55);
@@ -1288,9 +1299,21 @@ p { margin: 0 0 1em; }
 .carrusel__flecha:hover { background: var(--blanco); }
 .carrusel__flecha--izq { right: 78px; }
 .carrusel__flecha--der { right: 24px; }
-@media (max-width: 700px) {
+
+/* El menú flotante tapa la parte de arriba: el contenido se corre para abajo */
+.banner__cuerpo { padding-top: 46px; }
+
+@media (max-width: 860px) {
+  /* En celular el cartel escrito crece con su texto, porque forzarlo a una
+     proporción fija deja el contenido tapado por el menú. Las fotos sí
+     mantienen la proporción, para que el recorte sea parejo. */
+  .banner { aspect-ratio: auto; min-height: 320px; align-items: flex-end; }
+  .banner--foto { aspect-ratio: 4 / 3; min-height: 0; }
+  .banner__cuerpo { padding: 92px 24px 28px; max-width: none; }
+  .banner__etiqueta { margin-bottom: 10px; }
+  .banner__bajada { margin-bottom: 18px; }
+  .banner__cubos { right: -12%; opacity: .75; }
   .carrusel__flecha { display: none; }
-  .banner { aspect-ratio: 4 / 3; }
   .banners { margin-top: -72px; }
 }
 
@@ -1527,3 +1550,62 @@ p { margin: 0 0 1em; }
 .publicar__paso p { color: var(--tinta-suave); font-size: .95rem; }
 .publicar__paso .boton { margin: 4px 8px 0 0; }
 .publicar__paso .publicar__nota { margin-top: 12px; }
+
+/* ---------- 34. VISTA CHICA DEL CARTEL ESCRITO (panel) ------------------- */
+.mini {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  aspect-ratio: 1600 / 700;
+  padding: 14px;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+  color: var(--blanco);
+}
+.mini--azul  { background: linear-gradient(105deg, #0B3B77, #072650); }
+.mini--rojo  { background: linear-gradient(105deg, #D42A2A, #A01C1C); }
+.mini--claro { background: linear-gradient(105deg, #F1F5FA, #E4ECF6); color: var(--azul); }
+
+.mini__et {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: rgba(255,255,255,.24);
+  font-size: .6rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.mini--claro .mini__et { background: var(--rojo); color: var(--blanco); }
+.mini__et:empty { display: none; }
+
+.mini__ti {
+  font-size: .82rem; font-weight: 800; line-height: 1.15;
+  letter-spacing: -.02em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mini__bo {
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: var(--blanco); color: var(--azul);
+  font-size: .6rem; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.mini--rojo  .mini__bo { color: #A01C1C; }
+.mini--claro .mini__bo { background: var(--rojo); color: var(--blanco); }
+.mini__bo:empty { display: none; }
+
+/* Los campos del cartel escrito, en dos columnas */
+.flyer__campos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.flyer__campos .campo { margin: 0; }
+.flyer__campos .campo span {
+  display: block; font-size: .74rem; font-weight: 700;
+  color: var(--tinta-suave); margin-bottom: 4px;
+}
+.flyer__campos input, .flyer__campos select {
+  width: 100%; padding: 8px 11px;
+  border: 1px solid var(--escarcha); border-radius: var(--radio-chico);
+  font-family: var(--fuente); font-size: .88rem; color: var(--tinta); background: var(--blanco);
+}
+@media (max-width: 620px) { .flyer__campos { grid-template-columns: 1fr; } }
