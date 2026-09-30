@@ -8,27 +8,27 @@
   /* ======================================================================
      BANNER DESLIZABLE
      ====================================================================== */
-  /* Los cubos de hielo del fondo. Van en SVG: se ven nítidos en cualquier
-     pantalla y pesan unos pocos caracteres. */
+  /* La ilustración de cubos que va al costado del texto. Va en SVG: se ve
+     nítida en cualquier pantalla y pesa unos pocos caracteres. */
   function cubos() {
-    function cubo(x, y, a, op) {
-      var h = a * 0.55, alto = a * 0.82;
-      return '<g opacity="' + op + '">' +
+    function cubo(x, y, a) {
+      var h = a * 0.55, alto = a * 0.8;
+      return '' +
         '<path d="M' + (x-a) + ' ' + y + ' L' + x + ' ' + (y+h) + ' L' + x + ' ' + (y+h+alto) +
-              ' L' + (x-a) + ' ' + (y+alto) + 'Z" fill="rgba(255,255,255,.14)"/>' +
+              ' L' + (x-a) + ' ' + (y+alto) + 'Z" fill="rgba(255,255,255,.16)"/>' +
         '<path d="M' + x + ' ' + (y+h) + ' L' + (x+a) + ' ' + y + ' L' + (x+a) + ' ' + (y+alto) +
-              ' L' + x + ' ' + (y+h+alto) + 'Z" fill="rgba(255,255,255,.07)"/>' +
+              ' L' + x + ' ' + (y+h+alto) + 'Z" fill="rgba(255,255,255,.08)"/>' +
         '<path d="M' + x + ' ' + (y-h) + ' L' + (x+a) + ' ' + y + ' L' + x + ' ' + (y+h) +
-              ' L' + (x-a) + ' ' + y + 'Z" fill="rgba(255,255,255,.2)"/>' +
+              ' L' + (x-a) + ' ' + y + 'Z" fill="rgba(255,255,255,.26)"/>' +
         '<path d="M' + (x-a) + ' ' + y + ' L' + x + ' ' + (y-h) + ' L' + (x+a) + ' ' + y +
-              ' L' + x + ' ' + (y+h) + ' Z M' + (x-a) + ' ' + y + ' L' + (x-a) + ' ' + (y+alto) +
-              ' L' + x + ' ' + (y+h+alto) + ' L' + (x+a) + ' ' + (y+alto) + ' L' + (x+a) + ' ' + y +
+              ' M' + (x-a) + ' ' + y + ' L' + x + ' ' + (y+h) + ' L' + (x+a) + ' ' + y +
+              ' M' + (x-a) + ' ' + y + ' L' + (x-a) + ' ' + (y+alto) + ' L' + x + ' ' + (y+h+alto) +
+              ' L' + (x+a) + ' ' + (y+alto) + ' L' + (x+a) + ' ' + y +
               ' M' + x + ' ' + (y+h) + ' L' + x + ' ' + (y+h+alto) + '" ' +
-              'fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2.5" stroke-linejoin="round"/>' +
-      '</g>';
+              'fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
     }
-    return '<svg class="banner__cubos" viewBox="0 0 560 700" aria-hidden="true">' +
-      cubo(200, 250, 118, .95) + cubo(390, 415, 92, .8) + cubo(105, 470, 78, .65) +
+    return '<svg class="banner__cubos" viewBox="0 0 380 320" aria-hidden="true">' +
+      cubo(175, 120, 86) + cubo(288, 196, 62) + cubo(82, 214, 54) +
     '</svg>';
   }
 
@@ -39,13 +39,13 @@
     Datos.banners().then(function (lista) {
       if (!lista.length) {
         cont.innerHTML =
-          '<div class="banner banner--azul">' + cubos() +
+          '<div class="banner banner--azul">' +
             '<div class="banner__cuerpo">' +
               '<h2 class="banner__titulo">Hielo, bebidas y congelados</h2>' +
               '<p class="banner__bajada">Retiro en Viamonte 3646 sin mínimo de compra, ' +
                 'o envío a domicilio en Rosario.</p>' +
               '<span class="banner__boton">Ver el catálogo</span>' +
-            '</div>' +
+            '</div>' + cubos() +
           '</div>';
         return;
       }
@@ -68,6 +68,25 @@
           : '');
 
       if (lista.length > 1) conectarCarrusel(lista.length);
+
+      /* Si alguna lámina se quitó por no encontrar su imagen, se vuelve a
+         armar el carrusel con las que quedaron. */
+      document.addEventListener('banner-roto', function () {
+        clearTimeout(pintarBanners._t);
+        pintarBanners._t = setTimeout(function () {
+          var quedan = cont.querySelectorAll('.banner').length;
+          if (!quedan) { pintarBanners(); return; }
+          var puntos = document.getElementById('puntos');
+          if (puntos && puntos.children.length !== quedan) {
+            puntos.innerHTML = Array.from({ length: quedan }).map(function (_, i) {
+              return '<button class="carrusel__punto' + (i === 0 ? ' carrusel__punto--activo' : '') +
+                     '" data-i="' + i + '" aria-label="Ver cartel ' + (i + 1) + '"></button>';
+            }).join('');
+            if (quedan > 1) conectarCarrusel(quedan);
+            else puntos.remove();
+          }
+        }, 60);
+      }, { once: false });
     });
   }
 
@@ -81,19 +100,23 @@
     /* Cartel hecho con una foto del diseñador */
     if (b.tipo === 'foto' || (!b.tipo && b.imagen)) {
       var fuente = b.datos || b.imagen;   /* b.datos = todavía sin publicar */
+      /* Si la imagen no está subida todavía, la lámina se saca sola en vez
+         de dejar un recuadro blanco en la portada. */
       return envuelve('banner--foto',
-        '<img class="banner__foto" src="' + fuente + '" alt="" loading="lazy">');
+        '<img class="banner__foto" src="' + fuente + '" alt="" loading="lazy" ' +
+        'onerror="this.closest(\'.banner\').remove(); document.dispatchEvent(new Event(\'banner-roto\'))">');
     }
 
-    /* Cartel dibujado en la página */
+    /* Cartel dibujado en la página. El texto va primero para que quede a la
+       izquierda; la ilustración, a la derecha. */
     return envuelve('banner--' + (b.tono || 'azul'),
-      cubos() +
       '<div class="banner__cuerpo">' +
         (b.etiqueta ? '<span class="banner__etiqueta">' + b.etiqueta + '</span>' : '') +
         '<h2 class="banner__titulo">' + (b.titulo || '') + '</h2>' +
         (b.bajada ? '<p class="banner__bajada">' + b.bajada + '</p>' : '') +
         (b.boton ? '<span class="banner__boton">' + b.boton + '</span>' : '') +
-      '</div>');
+      '</div>' +
+      cubos());
   }
 
   function conectarCarrusel(total) {
@@ -259,7 +282,30 @@
     });
   }
 
+  /* Aviso de pedido en curso */
+  function pintarAvisoPedido() {
+    var caja = document.getElementById('avisoPedido');
+    if (!caja || !window.Carrito) return;
+    var n = Carrito.cuenta();
+    if (!n) { caja.innerHTML = ''; return; }
+
+    caja.innerHTML =
+      '<div class="aviso-pedido">' +
+        '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>' +
+        '<span>Tenés ' + n + (n === 1 ? ' producto' : ' productos') + ' esperando en tu pedido. ' +
+          '<a href="pedido.html">Terminá la compra</a></span>' +
+        '<button class="aviso-pedido__x" aria-label="Cerrar">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
+        '</button>' +
+      '</div>';
+
+    caja.querySelector('.aviso-pedido__x').addEventListener('click', function () {
+      caja.innerHTML = '';
+    });
+  }
+
   pintarBanners();
+  pintarAvisoPedido();
   conectarBuscador();
   pintarCategorias();
   pintarFilas();

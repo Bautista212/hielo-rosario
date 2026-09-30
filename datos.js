@@ -263,7 +263,8 @@
 
   /* Los que aparecen en "Destacados" y en "Los más vendidos".
      Son los identificadores (slug) de cada producto.                       */
-  var DESTACADOS = ['hielo-cubos-5kg', 'coca-15', 'quilmes-473', 'carbon-changuito'];
+  var DESTACADOS = ['hielo-cubos-5kg', 'coca-15', 'quilmes-473', 'carbon-changuito',
+                    'combo-fernet-1', 'heladera-telgopor'];
 
   var MAS_VENDIDOS = ['hielo-cubos-3kg', 'fernet-branca', 'stella-473', 'pizza-muzarella',
                       'emp-gamma-carne', 'papas-170'];
