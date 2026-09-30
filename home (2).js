@@ -32,11 +32,33 @@
     '</svg>';
   }
 
+  /* Pregunta una sola vez si la imagen existe. Las láminas cuya foto
+     todavía no se subió se descartan antes de dibujar nada, así no queda
+     un recuadro vacío ni se pide el archivo una y otra vez. */
+  function existeImagen(src) {
+    return new Promise(function (listo) {
+      if (!src) return listo(false);
+      if (src.indexOf('data:') === 0) return listo(true);   /* guardada acá */
+      var img = new Image();
+      img.onload = function () { listo(true); };
+      img.onerror = function () { listo(false); };
+      img.src = src;
+    });
+  }
+
   function pintarBanners() {
     var cont = document.getElementById('carrusel');
     if (!cont) return;
 
     Datos.banners().then(function (lista) {
+      return Promise.all(lista.map(function (b) {
+        if (b.tipo === 'foto' || (!b.tipo && b.imagen)) {
+          return existeImagen(b.datos || b.imagen).then(function (hay) { return hay ? b : null; });
+        }
+        return b;
+      }));
+    }).then(function (lista) {
+      lista = lista.filter(Boolean);
       if (!lista.length) {
         cont.innerHTML =
           '<div class="banner banner--azul">' +
@@ -69,24 +91,6 @@
 
       if (lista.length > 1) conectarCarrusel(lista.length);
 
-      /* Si alguna lámina se quitó por no encontrar su imagen, se vuelve a
-         armar el carrusel con las que quedaron. */
-      document.addEventListener('banner-roto', function () {
-        clearTimeout(pintarBanners._t);
-        pintarBanners._t = setTimeout(function () {
-          var quedan = cont.querySelectorAll('.banner').length;
-          if (!quedan) { pintarBanners(); return; }
-          var puntos = document.getElementById('puntos');
-          if (puntos && puntos.children.length !== quedan) {
-            puntos.innerHTML = Array.from({ length: quedan }).map(function (_, i) {
-              return '<button class="carrusel__punto' + (i === 0 ? ' carrusel__punto--activo' : '') +
-                     '" data-i="' + i + '" aria-label="Ver cartel ' + (i + 1) + '"></button>';
-            }).join('');
-            if (quedan > 1) conectarCarrusel(quedan);
-            else puntos.remove();
-          }
-        }, 60);
-      }, { once: false });
     });
   }
 
@@ -100,11 +104,8 @@
     /* Cartel hecho con una foto del diseñador */
     if (b.tipo === 'foto' || (!b.tipo && b.imagen)) {
       var fuente = b.datos || b.imagen;   /* b.datos = todavía sin publicar */
-      /* Si la imagen no está subida todavía, la lámina se saca sola en vez
-         de dejar un recuadro blanco en la portada. */
       return envuelve('banner--foto',
-        '<img class="banner__foto" src="' + fuente + '" alt="" loading="lazy" ' +
-        'onerror="this.closest(\'.banner\').remove(); document.dispatchEvent(new Event(\'banner-roto\'))">');
+        '<img class="banner__foto" src="' + fuente + '" alt="" loading="lazy">');
     }
 
     /* Cartel dibujado en la página. El texto va primero para que quede a la
