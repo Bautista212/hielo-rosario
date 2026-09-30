@@ -157,14 +157,24 @@
       /* Si ya está en el pedido, el botón se convierte en un contador.
          Así se suman unidades sin salir del catálogo. */
       var accion;
+      /* Los botones llevan dos rótulos: el largo para el catálogo y un
+         símbolo para cuando la tarjeta va compacta en la portada. */
       if (p.aConsultar) {
-        accion = '<a class="boton boton--linea boton--chico" href="producto.html?p=' + p.slug + '">Ver</a>';
+        accion = '<a class="boton boton--linea boton--chico" href="producto.html?p=' + p.slug +
+                 '" aria-label="Ver ' + p.nombre + '">' +
+                 '<span class="boton__texto">Ver</span><span class="boton__mas">›</span></a>';
       } else if (hayVarias) {
-        accion = '<a class="boton boton--principal boton--chico" href="producto.html?p=' + p.slug + '">Elegir</a>';
+        accion = '<a class="boton boton--principal boton--chico" href="producto.html?p=' + p.slug +
+                 '" aria-label="Elegir presentación de ' + p.nombre + '">' +
+                 '<span class="boton__texto">Elegir</span><span class="boton__mas">›</span></a>';
       } else if (enPedido > 0) {
         accion = UI.contador(p.slug + '|' + v.nombre, enPedido);
       } else {
-        accion = '<button class="boton boton--principal boton--chico" data-agregar="' + p.slug + '">Agregar</button>';
+        /* En la portada el botón es chico y solo dice "+", porque el espacio
+           es la mitad. El texto completo se mantiene en el catálogo. */
+        accion = '<button class="boton boton--principal boton--chico" data-agregar="' + p.slug +
+                 '" aria-label="Agregar ' + p.nombre + '">' +
+                 '<span class="boton__texto">Agregar</span><span class="boton__mas">+</span></button>';
       }
 
       return '' +
@@ -216,30 +226,78 @@
 
   };
 
+
+  /* ---- BARRA FLOTANTE DE ABAJO (celular) ---------------------------------
+     En el teléfono la navegación principal va abajo, al alcance del pulgar,
+     y el menú de arriba queda solo para el logo y el pedido.              */
+  function barraAbajo() {
+    var actual = paginaActual();
+    var items = [
+      { url: 'index.html', texto: 'Inicio',
+        icono: '<path d="M3 9l9-6 9 6v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>' },
+      { url: 'productos.html', texto: 'Productos',
+        icono: '<path d="M3 3h18v5H3z"/><path d="M5 8v13h14V8"/><path d="M10 12h4"/>' },
+      { url: 'pedido.html', texto: 'Mi pedido', cuenta: true,
+        icono: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>' },
+      { url: 'eventos.html', texto: 'Calcular',
+        icono: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h3M13 11h3M8 15h3M13 15h3"/>' },
+      { url: '#menu', texto: 'Menú', menu: true,
+        icono: '<path d="M3 6h18M3 12h18M3 18h18"/>' },
+    ];
+
+    return '<nav class="barra-abajo" aria-label="Navegación">' +
+      items.map(function (i) {
+        var activo = i.url === actual ? ' class="activo"' : '';
+        return '<a href="' + i.url + '"' + activo + (i.menu ? ' id="abrirMenu"' : '') + '>' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+            'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + i.icono + '</svg>' +
+          '<span>' + i.texto + '</span>' +
+          (i.cuenta ? '<span class="barra-abajo__cuenta" id="cuentaAbajo" data-vacio="si"></span>' : '') +
+        '</a>';
+      }).join('') +
+    '</nav>';
+  }
+
   /* ---- Contador del carrito en el header -------------------------------- */
   function actualizarContador() {
-    var el = document.getElementById('cuentaCarrito');
-    if (!el || !window.Carrito) return;
+    if (!window.Carrito) return;
     var n = Carrito.cuenta();
-    el.textContent = n > 0 ? n : '';
-    el.setAttribute('data-vacio', n > 0 ? 'no' : 'si');
+    ['cuentaCarrito', 'cuentaAbajo'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = n > 0 ? n : '';
+      el.setAttribute('data-vacio', n > 0 ? 'no' : 'si');
+    });
   }
 
   /* ---- Arranque --------------------------------------------------------- */
   function montar() {
     var h = document.getElementById('header');
     var f = document.getElementById('footer');
+    var ba = document.getElementById('barraAbajo');
     if (h) h.innerHTML = header();
     if (f) f.innerHTML = footer();
+    /* La barra de abajo se agrega en todas las páginas, aunque el HTML no
+       la declare: así no hay que tocar cada archivo. */
+    if (!ba) {
+      ba = document.createElement('div');
+      ba.id = 'barraAbajo';
+      document.body.appendChild(ba);
+    }
+    ba.innerHTML = barraAbajo();
 
     var btn = document.getElementById('menuBtn');
     var nav = document.getElementById('nav');
-    if (btn && nav) {
-      btn.addEventListener('click', function () {
-        var abierto = nav.classList.toggle('abierto');
-        btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
-      });
+    function alternarMenu(e) {
+      if (e) e.preventDefault();
+      var abierto = nav.classList.toggle('abierto');
+      if (btn) btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+      if (abierto) window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    if (btn && nav) btn.addEventListener('click', alternarMenu);
+
+    var abrir = document.getElementById('abrirMenu');
+    if (abrir && nav) abrir.addEventListener('click', alternarMenu);
 
     actualizarContador();
     document.addEventListener('carrito', actualizarContador);
